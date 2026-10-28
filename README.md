@@ -49,19 +49,19 @@ implemented by this module.
 
 ### Build and run the collision tests
 
-Requirements: a C++17 compiler, CMake 3.14 or newer, Git, and a CMake-compatible
+Requirements: a C++17 compiler, CMake 3.20 or newer, Git, and a CMake-compatible
 build tool. The first configuration downloads the pinned GoogleTest v1.17.0
 source and requires internet access.
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake -S . -B build -DBUILD_GAME=OFF -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --config Debug
 cmake -E chdir build ctest -C Debug --output-on-failure
 ```
 
 To build only the library without downloading GoogleTest, configure with
 `-DBUILD_TESTING=OFF`. These commands build the collision library and tests;
-there is no game executable yet.
+the movement-only game is built separately as described below.
 
 ### Integration contract
 
@@ -89,13 +89,31 @@ then apply food/scoring updates. Only the controller changes game state.
   extra space. Empty bodies and non-positive dimensions throw
   `std::invalid_argument`; initialization must validate them.
 
-The starter `Snake` class currently stores SFML rectangles privately. For
-integration, its owner must provide the ordered integer grid cells described in
-the SAD; pixel positions must not be passed as cell coordinates. Rendering can
-convert cells to pixels. Movement, game-over UI, and game-loop integration remain
-their respective owners' work.
+The `Snake` class exposes SFML rectangles through `getBody()`. For collision
+integration, convert their pixel positions to the ordered integer grid cells
+described in the SAD; pixel positions must not be passed as cell coordinates.
+Rendering can convert cells to pixels. Game-over UI and game-loop integration
+remain their respective owners' work.
 
 Unit tests cover every wall, in-bounds edges, self-collision, both tail rules,
 the TC-05 layouts, single-segment snakes, unchanged input and invalid setup.
 Passing these tests verifies the detector; full TC-05 game-over display and
 stopped-movement checks still need the integrated game.
+
+## Build the movement game and both test suites
+
+Install SFML 2.6.x for your compiler/architecture. SFML 3 uses a different API
+and is not supported by this movement code. Set `SFML_DIR` to the directory
+containing `SFMLConfig.cmake` if CMake cannot find the installation automatically.
+No developer-specific installation path is hard-coded in the build.
+
+```sh
+cmake -S . -B build-game -DBUILD_GAME=ON -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-game --config Debug
+cmake -E chdir build-game ctest -C Debug --output-on-failure
+```
+
+Run `build-game/SnakeGame` with a single-configuration generator, or
+`build-game/Debug/SnakeGame.exe` with Visual Studio. The current game demonstrates
+arrow-key movement and window close only. Food, score, collision/game-over and
+restart still need integration; building both modules does not connect them.
