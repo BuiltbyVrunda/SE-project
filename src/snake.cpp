@@ -1,24 +1,27 @@
 #include "snake.h"
+#include <cmath>
 
 Snake::Snake()
     : direction(20.f, 0.f),
       directionChangedThisStep(false)
 {
+    reset();
+}
+
+void Snake::reset()
+{
+    body.clear();
+    direction = sf::Vector2f(20.f, 0.f);
+    directionChangedThisStep = false;
+
     const float segmentSize = 20.f;
     const sf::Vector2f startPosition(100.f, 100.f);
 
-    // Start with a small snake containing three segments.
+    // Start with a small snake containing three segments (head at (100, 100)).
     for (int i = 0; i < 3; ++i)
     {
-        sf::RectangleShape segment(
-            sf::Vector2f(segmentSize, segmentSize)
-        );
-
-        segment.setPosition(
-            startPosition.x - i * segmentSize,
-            startPosition.y
-        );
-
+        sf::RectangleShape segment(sf::Vector2f(segmentSize, segmentSize));
+        segment.setPosition(startPosition.x - i * segmentSize, startPosition.y);
         segment.setFillColor(sf::Color(70, 200, 100));
         body.push_back(segment);
     }
@@ -30,55 +33,46 @@ Snake::Snake()
     }
 }
 
-void Snake::move()
+void Snake::advance(bool growSnake)
 {
     if (body.empty())
     {
         return;
     }
 
-    // Save the current tail position.
-    sf::Vector2f previousTailPosition =
-        body.back().getPosition();
-
-    // Move each segment to the previous segment's position.
-    for (std::size_t i = body.size() - 1; i > 0; --i)
-    {
-        body[i].setPosition(body[i - 1].getPosition());
-    }
-
-    // Move the head.
-    sf::Vector2f nextPosition =
-        body.front().getPosition() + direction;
-
     const float segmentSize = 20.f;
-    const float windowWidth = 800.f;
-    const float windowHeight = 600.f;
+    const sf::Vector2f nextHeadPosition = body.front().getPosition() + direction;
 
-    // Wrap around the horizontal edges.
-    if (nextPosition.x >= windowWidth)
+    if (growSnake)
     {
-        nextPosition.x = 0.f;
+        // Add a new head segment at nextHeadPosition
+        sf::RectangleShape newHead(sf::Vector2f(segmentSize, segmentSize));
+        newHead.setPosition(nextHeadPosition);
+        newHead.setFillColor(sf::Color::Yellow);
+
+        // Turn previous head green
+        body.front().setFillColor(sf::Color(70, 200, 100));
+
+        // Insert at beginning
+        body.insert(body.begin(), newHead);
     }
-    else if (nextPosition.x < 0.f)
+    else
     {
-        nextPosition.x = windowWidth - segmentSize;
+        // Move segments from tail to second segment
+        for (std::size_t i = body.size() - 1; i > 0; --i)
+        {
+            body[i].setPosition(body[i - 1].getPosition());
+        }
+        body.front().setPosition(nextHeadPosition);
     }
 
-    // Wrap around the vertical edges.
-    if (nextPosition.y >= windowHeight)
-    {
-        nextPosition.y = 0.f;
-    }
-    else if (nextPosition.y < 0.f)
-    {
-        nextPosition.y = windowHeight - segmentSize;
-    }
-
-    body.front().setPosition(nextPosition);
-
-    // Allow the next turn.
+    // Allow next turn
     directionChangedThisStep = false;
+}
+
+void Snake::move()
+{
+    advance(false);
 }
 
 void Snake::grow()
@@ -88,11 +82,8 @@ void Snake::grow()
         return;
     }
 
-    // Add a segment at the current tail position.
-    sf::RectangleShape segment(
-        sf::Vector2f(20.f, 20.f)
-    );
-
+    // Add a segment at current tail position
+    sf::RectangleShape segment(sf::Vector2f(20.f, 20.f));
     segment.setPosition(body.back().getPosition());
     segment.setFillColor(sf::Color(70, 200, 100));
 
@@ -140,4 +131,32 @@ const std::vector<sf::RectangleShape>& Snake::getBody() const
 sf::Vector2f Snake::getDirection() const
 {
     return direction;
+}
+
+snakegame::Body Snake::getGridBody() const
+{
+    snakegame::Body gridBody;
+    gridBody.reserve(body.size());
+    for (const auto& segment : body)
+    {
+        const sf::Vector2f pos = segment.getPosition();
+        gridBody.push_back(snakegame::Cell{
+            static_cast<int>(std::round(pos.x / 20.f)),
+            static_cast<int>(std::round(pos.y / 20.f))
+        });
+    }
+    return gridBody;
+}
+
+snakegame::Cell Snake::getNextHeadGrid() const
+{
+    if (body.empty())
+    {
+        return snakegame::Cell{0, 0};
+    }
+    const sf::Vector2f nextPos = body.front().getPosition() + direction;
+    return snakegame::Cell{
+        static_cast<int>(std::round(nextPos.x / 20.f)),
+        static_cast<int>(std::round(nextPos.y / 20.f))
+    };
 }

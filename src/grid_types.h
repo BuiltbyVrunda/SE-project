@@ -2,6 +2,7 @@
 #define SNAKE_GAME_GRID_TYPES_H
 
 #include <vector>
+#include <iosfwd>
 
 namespace snakegame {
 
@@ -12,6 +13,10 @@ struct Cell {
 
 constexpr bool operator==(Cell lhs, Cell rhs) {
     return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+constexpr bool operator!=(Cell lhs, Cell rhs) {
+    return !(lhs == rhs);
 }
 
 struct BoardBounds {
