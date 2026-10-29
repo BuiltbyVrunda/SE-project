@@ -20,7 +20,7 @@ target_include_directories(snake_food PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 option(BUILD_GAME "Build the SFML game and movement module" ON)
 if(BUILD_GAME)
     # Use SFML_DIR or CMAKE_PREFIX_PATH for non-standard installations.
-    find_package(SFML 2.6 COMPONENTS graphics window system REQUIRED)
+    find_package(SFML 2 COMPONENTS graphics window system REQUIRED)
 
     add_library(snake src/snake.cpp)
     target_include_directories(snake PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
