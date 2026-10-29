@@ -1,119 +1,179 @@
 # Snake Game
 
-A software engineering mini-project developed as part of the Software Engineering course at PES University.
+A software engineering project developed as part of the Software Engineering course at PES University.
 
-## Project Overview
+## Team Members & Responsibilities
 
-Snake Game is a classic interactive game developed using C++ and SFML. The player controls a snake, collects food, increases the snake's length and score, and avoids collisions with the game boundaries and itself.
+| Name | SRN | Primary Responsibilities | Modules |
+| :--- | :--- | :--- | :--- |
+| **Yele Charan** | PES1UG25CS856 | SRS, snake movement logic, direction validation | `src/snake.h`, `src/snake.cpp`, `tests/snake_test.cpp` |
+| **Vrunda C** | PES1UG24CS541 | Test plan, food generation, growth, scoring | `src/food_manager.h`, `src/food_manager.cpp` |
+| **Ved Mudkavi** | PES1UG24CS522 | Architecture & design, collision detection | `src/collision_detector.h`, `src/collision_detector.cpp`, `tests/collision_detector_test.cpp` |
+| **Tushar N** | PES1UG24CS504 | Integration, lifecycle, Game Controller, UI, CI/CD | `src/game_controller.h`, `src/game_controller.cpp`, `src/main.cpp`, `tests/game_integration_test.cpp`, `.github/workflows/ci.yml` |
 
-The project is developed following the Software Development Life Cycle (SDLC) and Agile methodology, with emphasis on modular design, testing, version control, code quality, and maintainability.
+---
 
-## Planned Features
+## Architecture and Module Integration
 
-- Start and play a new game
-- Control the snake using keyboard controls
-- Random food generation
-- Snake growth after eating food
-- Score tracking
-- Collision detection
-- Game-over detection
-- Restart functionality
-- Increasing game difficulty
+The application follows a modular architecture separating presentation, domain rules, and lifecycle coordination.
 
-## Technology Stack
+```
++-----------------------------------------------------------+
+|                      Presentation                         |
+|  SFML RenderWindow, Event Polling, HUD, Start/GameOver UI |
++-----------------------------+-----------------------------+
+                              | (user input / render calls)
+                              v
++-----------------------------------------------------------+
+|                     Game Controller                       |
+|   State Machine: Ready -> Playing -> GameOver / Complete  |
+|      Coordinates pre-movement collision check & reset     |
++-------------+---------------+-----------------------------+
+              |               |
+              v               v
++-----------------------+   +-------------------------------+
+|         Snake         |   |         Food Manager          |
+|  Body segments (grid) |   |  Random unoccupied placement  |
+|  Direction & latch    |   |  Consumption & score tracking |
++-------------+---------+   +---------------+---------------+
+              |                             |
+              +--------------+--------------+
+                             v
+              +-----------------------------+
+              |     Collision Detector      |
+              |  Pure Boundary & Self check |
+              |  TC-05 Departing tail rule  |
+              +-----------------------------+
+```
 
-- **Programming Language:** C++
-- **Graphics Library:** SFML
-- **Version Control:** Git
-- **Repository:** GitHub
-- **Testing:** Google Test (gtest)
-- **CI/CD:** Jenkins
-- **Containerization:** Docker
-- **Project Management:** Jira / GitHub Projects
-- **Static Code Analysis:** SonarQube
+### 1. Snake Movement (`src/snake.h`, `src/snake.cpp`)
+- Tracks snake segments in both pixel space (for rendering) and discrete grid coordinates.
+- Manages discrete movement direction (Up, Down, Left, Right).
+- Enforces direction validation: rejects immediate 180-degree reversals and rapid multi-key turn reversals within the same movement tick using an input latch.
+- Supports atomic advancement and growth (`advance(bool growSnake)`).
 
-## Project Structure
+### 2. Food Placement & Scoring (`src/food_manager.h`, `src/food_manager.cpp`)
+- Places food randomly strictly on unoccupied grid cells (`place(bounds, body, rng)`).
+- Eliminates infinite random retry loops by identifying free cells directly.
+- Detects board saturation (`PlacementResult::BoardFull`).
+- Awards 10 points per food item and triggers snake growth by 1 segment.
 
-The project will follow a modular architecture to improve maintainability, testing, debugging, and future extension.
+### 3. Collision Detection (`src/collision_detector.h`, `src/collision_detector.cpp`)
+- Pure domain logic with zero SFML dependencies.
+- Validates the candidate head position *before* movement is committed.
+- Detects boundary collisions against all four walls (`0 <= x < columns`, `0 <= y < rows`).
+- Detects self-collisions against occupied snake segments.
+- Enforces the **departing tail rule** (SAD TC-05): on a non-growing move, the tail segment leaves its cell in the same tick, making that cell safe to enter; on a growing move, the tail stays and is treated as occupied.
 
-## Development Methodology
+### 4. Game Controller & Lifecycle (`src/game_controller.h`, `src/game_controller.cpp`)
+- State machine managing `Ready`, `Playing`, `GameOver`, and `RoundComplete`.
+- Coordinates the tick sequence:
+  1. Poll player input and latch direction change.
+  2. Compute candidate next head position without modifying the snake.
+  3. Query food presence at candidate head (`willGrow`).
+  4. Perform collision check with candidate head and `willGrow` flag.
+  5. If fatal collision occurs (`Boundary` or `Self`), immediately enter `GameOver`, leaving snake and score intact.
+  6. If safe (`None`), commit snake advancement (`advance(willGrow)`), increment score by 10, and request replacement food.
+- Handles atomic restart: resets snake to initial 3 segments at `(5, 5)`, direction to Right, score to 0, regenerates food on a free cell, and clears game-over state.
 
-The project follows **Agile methodology** with iterative development, user stories, backlog management, Git branches, pull requests, code reviews, testing, and continuous integration.
+---
 
-## Collision Module (Ved)
+## Keyboard Controls
 
-The collision module implements the SAD Section 4.3.2 contract for FR-12 and
-FR-13 and supplies the collision result needed by FR-14. It uses integer grid
-cells and does not require SFML. The game controller and playable game are not
-implemented by this module.
+| Key | Context | Action |
+| :--- | :--- | :--- |
+| **Enter / Space** | Ready screen | Start new round |
+| **Arrow Up** | Playing | Move snake Up |
+| **Arrow Down** | Playing | Move snake Down |
+| **Arrow Left** | Playing | Move snake Left |
+| **Arrow Right** | Playing | Move snake Right |
+| **R / r** | Game Over / Win | Restart game (clean reset) |
+| **Escape** | Any | Exit game cleanly |
 
-### Build and run the collision tests
+---
 
-Requirements: a C++17 compiler, CMake 3.20 or newer, Git, and a CMake-compatible
-build tool. The first configuration downloads the pinned GoogleTest v1.17.0
-source and requires internet access.
+## Build Instructions
 
+### Prerequisites
+- C++17 compliant compiler (GCC 11+, Clang 13+, or MSVC 2019+)
+- CMake 3.20 or newer
+- SFML 2.6.x (installed via package manager or configured via `SFML_DIR`)
+- Git (for automatic GoogleTest FetchContent)
+
+### Linux (Ubuntu/Debian)
 ```sh
-cmake -S . -B build -DBUILD_GAME=OFF -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug
-cmake -E chdir build ctest -C Debug --output-on-failure
+# Install dependencies
+sudo apt-get update
+sudo apt-get install -y build-essential cmake libsfml-dev
+
+# Configure and build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_GAME=ON -DBUILD_TESTING=ON
+cmake --build build --config Release
+
+# Run automated tests
+ctest --test-dir build --output-on-failure -C Release
+
+# Run the game
+./build/SnakeGame
 ```
 
-To build only the library without downloading GoogleTest, configure with
-`-DBUILD_TESTING=OFF`. These commands build the collision library and tests;
-the movement-only game is built separately as described below.
-
-### Integration contract
-
-Include `collision_detector.h` and link the `snake_collision` CMake target.
-Types are in namespace `snakegame`: `Cell`, `Body`, `BoardBounds` and
-`CollisionType`. Pass the **current** body ordered head-to-tail, the candidate
-next head, positive board dimensions, and whether that move will grow the snake.
-
-```cpp
-snakegame::CollisionDetector detector;
-snakegame::Body body{{5, 4}, {4, 4}, {3, 4}};
-const auto result = detector.check({6, 4}, body, {10, 8}, false);
-// result is CollisionType::None: the candidate is free and inside the board.
-```
-
-On each movement tick, the controller must calculate the next head and food/growth
-flag **before advancing the snake**. If the result is `Boundary` or `Self`, enter
-game over and leave the body and score unchanged. Otherwise commit the move,
-then apply food/scoring updates. Only the controller changes game state.
-
-- Valid coordinates: `0 <= x < columns` and `0 <= y < rows`.
-- On a non-growing move the tail leaves, so its cell is safe to enter.
-- On a growing move the tail stays, so its cell remains occupied.
-- The detector has no side effects and runs in O(snake length) time with O(1)
-  extra space. Empty bodies and non-positive dimensions throw
-  `std::invalid_argument`; initialization must validate them.
-
-The `Snake` class exposes SFML rectangles through `getBody()`. For collision
-integration, convert their pixel positions to the ordered integer grid cells
-described in the SAD; pixel positions must not be passed as cell coordinates.
-Rendering can convert cells to pixels. Game-over UI and game-loop integration
-remain their respective owners' work.
-
-Unit tests cover every wall, in-bounds edges, self-collision, both tail rules,
-the TC-05 layouts, single-segment snakes, unchanged input and invalid setup.
-Passing these tests verifies the detector; full TC-05 game-over display and
-stopped-movement checks still need the integrated game.
-
-## Build the movement game and both test suites
-
-Install SFML 2.6.x for your compiler/architecture. SFML 3 uses a different API
-and is not supported by this movement code. Set `SFML_DIR` to the directory
-containing `SFMLConfig.cmake` if CMake cannot find the installation automatically.
-No developer-specific installation path is hard-coded in the build.
-
+### Windows (GCC / MinGW or MSVC)
 ```sh
-cmake -S . -B build-game -DBUILD_GAME=ON -DCMAKE_BUILD_TYPE=Debug
-cmake --build build-game --config Debug
-cmake -E chdir build-game ctest -C Debug --output-on-failure
+# Configure specifying SFML path if not installed globally
+cmake -S . -B build -DBUILD_GAME=ON -DCMAKE_BUILD_TYPE=Release -DSFML_DIR="<path_to_SFMLConfig.cmake>"
+cmake --build build --config Release
+
+# Run automated tests
+ctest --test-dir build --output-on-failure -C Release
+
+# Launch the game
+build\SnakeGame.exe
 ```
 
-Run `build-game/SnakeGame` with a single-configuration generator, or
-`build-game/Debug/SnakeGame.exe` with Visual Studio. The current game demonstrates
-arrow-key movement and window close only. Food, score, collision/game-over and
-restart still need integration; building both modules does not connect them.
+---
+
+## Automated Test Suites
+
+The repository contains automated tests across three targets, covering all functional requirements:
+
+| Test Target | Framework | Description | Coverage |
+| :--- | :--- | :--- | :--- |
+| `collision_tests` | Google Test | Pure collision detector verification | 23 tests covering wall collisions, valid cells, tail rules, TC-05 fixtures, invalid bounds |
+| `SnakeTests` | Standalone | Charan's snake movement tests | 6 tests covering initial direction, turns, reversal rejection, forward step |
+| `game_integration_tests` | Google Test | Integrated game controller and food logic | 10 tests covering all 12 required scenarios, food manager logic, and restart lifecycle |
+
+To run all 39 tests:
+```sh
+ctest --test-dir build --output-on-failure --verbose
+```
+
+### Test Scenarios Covered
+1. **Normal snake movement:** snake advances 1 cell in current heading per tick.
+2. **Permitted direction steering:** snake successfully turns Up, Down, Left, and Right.
+3. **Invalid reversal prevention:** immediate opposite directions and double-turn reversals are rejected.
+4. **Wall collision:** head hitting board boundary stops gameplay and triggers `GameOver`.
+5. **Self-collision:** snake looping back into its own body triggers `GameOver`.
+6. **Food consumption & scoring:** eating food increases score by 10, increases length by 1, and spawns new food.
+7. **Game Over behavior:** fatal collision halts movement, preserves final score, and presents Game Over screen.
+8. **Movement stoppage after Game Over:** subsequent movement ticks or input do not alter snake coordinates or score.
+9. **Restart after Game Over:** pressing restart restores playable state.
+10. **State reset:** position resets to initial 3 segments, direction resets to Right, score resets to 0, food is placed on a free cell.
+11. **Continued gameplay after restart:** subsequent steering, food collection, and scoring work seamlessly.
+12. **Collision regression testing:** departing tail rule (TC-05) verifies tail vacates safely on non-growing moves.
+
+---
+
+## Continuous Integration (GitHub Actions)
+
+A GitHub Actions workflow is configured under `.github/workflows/ci.yml`.
+- **Triggers:** Pushes and pull requests on all team branches (`main`, `charan`, `tushar`, `ved`, `vrunda`).
+- **Platform:** Ubuntu with headless virtual display (`xvfb`).
+- **Steps:** Checks out repository, installs `libsfml-dev` and build tools, configures CMake, builds all targets, and runs the complete test suite with CTest.
+
+---
+
+## Known Limitations
+
+1. **Local Desktop Application:** The game is designed for local single-player execution; network multiplayer and online leaderboards are out of scope.
+2. **SFML Version:** Developed and tested against SFML 2.6.x. SFML 3.x is not supported due to breaking API changes.
+3. **Display Requirement for Game Launch:** Playing the interactive graphical game requires a desktop display environment; automated logic tests run headlessly in CI without graphical display dependencies.
