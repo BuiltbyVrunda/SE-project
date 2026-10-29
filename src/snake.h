@@ -4,11 +4,13 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
-class Snake {
+class Snake
+{
 public:
     Snake();
 
     void move();
+    void grow();
 
     bool changeDirection(const sf::Vector2f& newDirection);
 
