@@ -151,6 +151,15 @@ int main()
                 scoreText.setString("Score: " + std::to_string(controller.getScore()));
                 scoreText.setPosition(15.f, 10.f);
                 window.draw(scoreText);
+
+                sf::Text bestText;
+                bestText.setFont(font);
+                bestText.setCharacterSize(20);
+                bestText.setFillColor(sf::Color(255, 215, 0));
+                bestText.setString("Best: " + std::to_string(controller.getBestScore()));
+                const auto bestBounds = bestText.getLocalBounds();
+                bestText.setPosition(windowWidth - bestBounds.width - 15.f, 10.f);
+                window.draw(bestText);
             }
             else if (controller.getState() == snakegame::GameState::Ready)
             {
@@ -253,6 +262,16 @@ int main()
                                       windowHeight / 2.f - 15.f);
                 window.draw(scoreText);
 
+                sf::Text bestText;
+                bestText.setFont(font);
+                bestText.setCharacterSize(18);
+                bestText.setFillColor(sf::Color(255, 215, 0));
+                bestText.setString("Best Score: " + std::to_string(controller.getBestScore()));
+                const auto bestBounds = bestText.getLocalBounds();
+                bestText.setPosition(windowWidth / 2.f - bestBounds.width / 2.f,
+                                     windowHeight / 2.f + 18.f);
+                window.draw(bestText);
+
                 sf::Text restartText;
                 restartText.setFont(font);
                 restartText.setCharacterSize(20);
@@ -260,7 +279,7 @@ int main()
                 restartText.setString("Press 'R' to Restart");
                 const auto restartBounds = restartText.getLocalBounds();
                 restartText.setPosition(windowWidth / 2.f - restartBounds.width / 2.f,
-                                        windowHeight / 2.f + 35.f);
+                                        windowHeight / 2.f + 50.f);
                 window.draw(restartText);
 
                 sf::Text exitText;
@@ -270,7 +289,7 @@ int main()
                 exitText.setString("Press ESC to Exit");
                 const auto exitBounds = exitText.getLocalBounds();
                 exitText.setPosition(windowWidth / 2.f - exitBounds.width / 2.f,
-                                     windowHeight / 2.f + 75.f);
+                                     windowHeight / 2.f + 88.f);
                 window.draw(exitText);
             }
             else if (controller.getState() == snakegame::GameState::RoundComplete)
@@ -304,6 +323,16 @@ int main()
                                       windowHeight / 2.f - 20.f);
                 window.draw(scoreText);
 
+                sf::Text bestText;
+                bestText.setFont(font);
+                bestText.setCharacterSize(18);
+                bestText.setFillColor(sf::Color(255, 215, 0));
+                bestText.setString("Best Score: " + std::to_string(controller.getBestScore()));
+                const auto bestBounds = bestText.getLocalBounds();
+                bestText.setPosition(windowWidth / 2.f - bestBounds.width / 2.f,
+                                     windowHeight / 2.f + 14.f);
+                window.draw(bestText);
+
                 sf::Text restartText;
                 restartText.setFont(font);
                 restartText.setCharacterSize(20);
@@ -311,7 +340,7 @@ int main()
                 restartText.setString("Press 'R' to Restart");
                 const auto restartBounds = restartText.getLocalBounds();
                 restartText.setPosition(windowWidth / 2.f - restartBounds.width / 2.f,
-                                        windowHeight / 2.f + 30.f);
+                                        windowHeight / 2.f + 50.f);
                 window.draw(restartText);
             }
         }
