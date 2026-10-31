@@ -1,347 +1,406 @@
 #include <SFML/Graphics.hpp>
-#include <algorithm>
 #include <iostream>
 #include <string>
-#include <vector>
+
 #include "game_controller.h"
 
-namespace {
-
-bool loadGameFont(sf::Font& font)
+namespace
 {
-    const std::vector<std::string> candidatePaths = {
-        "assets/arial.ttf",
-        "C:/Windows/Fonts/arial.ttf",
-        "C:/Windows/Fonts/consola.ttf",
-        "C:/Windows/Fonts/segoeui.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-        "/usr/share/fonts/TTF/DejaVuSans.ttf"
-    };
+    constexpr unsigned int CELL_SIZE = 20;
+    constexpr unsigned int WINDOW_WIDTH = 800;
+    constexpr unsigned int WINDOW_HEIGHT = 600;
 
-    for (const auto& path : candidatePaths)
+    bool loadGameFont(sf::Font& font)
     {
-        if (font.loadFromFile(path))
+        const std::string fontPaths[] = {
+            "assets/arial.ttf",
+            "C:/Windows/Fonts/arial.ttf",
+            "C:/Windows/Fonts/segoeui.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+        };
+
+        for (const auto& path : fontPaths)
         {
-            return true;
+            if (font.loadFromFile(path))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void drawText(sf::RenderWindow& window,
+                  const sf::Font& font,
+                  const std::string& message,
+                  unsigned int size,
+                  float x,
+                  float y,
+                  sf::Color color = sf::Color::White)
+    {
+        sf::Text text(message, font, size);
+        text.setFillColor(color);
+        text.setPosition(x, y);
+        window.draw(text);
+    }
+
+    void drawCenteredText(sf::RenderWindow& window,
+                          const sf::Font& font,
+                          const std::string& message,
+                          unsigned int size,
+                          float y,
+                          sf::Color color = sf::Color::White)
+    {
+        sf::Text text(message, font, size);
+        text.setFillColor(color);
+
+        const sf::FloatRect textBounds = text.getLocalBounds();
+
+        text.setOrigin(
+            textBounds.left + textBounds.width / 2.f,
+            textBounds.top + textBounds.height / 2.f
+        );
+
+        text.setPosition(WINDOW_WIDTH / 2.f, y);
+        window.draw(text);
+    }
+
+    void drawSnake(sf::RenderWindow& window, const Snake& snake)
+    {
+        const auto& body = snake.getBody();
+
+        for (std::size_t i = 0; i < body.size(); ++i)
+        {
+            sf::RectangleShape segment = body[i];
+
+            segment.setFillColor(
+                i == 0 ? sf::Color(255, 210, 50)
+                       : sf::Color(60, 190, 90)
+            );
+
+            segment.setOutlineThickness(1.f);
+            segment.setOutlineColor(sf::Color(25, 25, 25));
+
+            window.draw(segment);
         }
     }
-    return false;
-}
 
-} // namespace
+    void drawFood(sf::RenderWindow& window,
+                  const snakegame::FoodManager& foodManager)
+    {
+        const auto food = foodManager.position();
+
+        if (!food.has_value())
+        {
+            return;
+        }
+
+        sf::CircleShape foodShape(CELL_SIZE / 2.f - 2.f);
+
+        foodShape.setFillColor(sf::Color::Red);
+
+        foodShape.setPosition(
+            static_cast<float>(food->x * CELL_SIZE + 2),
+            static_cast<float>(food->y * CELL_SIZE + 2)
+        );
+
+        window.draw(foodShape);
+    }
+}
 
 int main()
 {
-    const unsigned int windowWidth = 800;
-    const unsigned int windowHeight = 600;
-    const float cellSize = 20.f;
-
     sf::RenderWindow window(
-        sf::VideoMode(windowWidth, windowHeight),
+        sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT),
         "Snake Game"
     );
-    window.setFramerateLimit(60);
 
-    snakegame::GameController controller({40, 30}, 0.15f);
+    window.setFramerateLimit(60);
 
     sf::Font font;
     const bool fontLoaded = loadGameFont(font);
-    if (!fontLoaded)
-    {
-        std::cerr << "Note: System font could not be loaded; text rendering will be minimal.\n";
-    }
 
-    sf::Clock frameClock;
+    snakegame::GameController controller({40, 30}, 0.15f);
+
+    sf::Clock deltaClock;
+
+    // FPS measurement variables
+    sf::Clock fpsClock;
+    unsigned int frameCount = 0;
+    float currentFPS = 0.f;
 
     while (window.isOpen())
     {
         sf::Event event;
+
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
             {
                 window.close();
             }
-            else if (event.type == sf::Event::KeyPressed)
+
+            if (event.type == sf::Event::KeyPressed)
             {
                 if (event.key.code == sf::Keyboard::Escape)
                 {
                     window.close();
                 }
-                else if (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Space)
+
+                // Start the game.
+                if ((event.key.code == sf::Keyboard::Enter ||
+                     event.key.code == sf::Keyboard::Space) &&
+                    controller.getState() == snakegame::GameState::Ready)
                 {
-                    if (controller.getState() == snakegame::GameState::Ready)
-                    {
-                        controller.startRound();
-                    }
+                    controller.startRound();
                 }
-                else if (event.key.code == sf::Keyboard::R)
+
+                // Restart after Game Over or Round Complete.
+                if (event.key.code == sf::Keyboard::R &&
+                    (controller.getState() == snakegame::GameState::GameOver ||
+                     controller.getState() == snakegame::GameState::RoundComplete))
                 {
-                    if (controller.getState() == snakegame::GameState::GameOver ||
-                        controller.getState() == snakegame::GameState::RoundComplete)
-                    {
-                        controller.restart();
-                    }
+                    controller.restart();
                 }
-                else if (controller.getState() == snakegame::GameState::Playing)
+
+                // Arrow-key movement.
+                // Snake expects movement values of 20 or -20.
+                if (controller.getState() == snakegame::GameState::Playing)
                 {
                     switch (event.key.code)
                     {
-                    case sf::Keyboard::Up:
-                        controller.handleDirectionInput({ 0.f, -cellSize });
-                        break;
-                    case sf::Keyboard::Down:
-                        controller.handleDirectionInput({ 0.f, cellSize });
-                        break;
-                    case sf::Keyboard::Left:
-                        controller.handleDirectionInput({ -cellSize, 0.f });
-                        break;
-                    case sf::Keyboard::Right:
-                        controller.handleDirectionInput({ cellSize, 0.f });
-                        break;
-                    default:
-                        // Unsupported keys safely ignored (SR-01)
-                        break;
+                        case sf::Keyboard::Up:
+                            controller.handleDirectionInput({0.f, -20.f});
+                            break;
+
+                        case sf::Keyboard::Down:
+                            controller.handleDirectionInput({0.f, 20.f});
+                            break;
+
+                        case sf::Keyboard::Left:
+                            controller.handleDirectionInput({-20.f, 0.f});
+                            break;
+
+                        case sf::Keyboard::Right:
+                            controller.handleDirectionInput({20.f, 0.f});
+                            break;
+
+                        default:
+                            break;
                     }
                 }
             }
         }
 
-        // Advance simulation with frame delta (cap to avoid spiral after window movement)
-        const float dt = std::min(frameClock.restart().asSeconds(), 0.2f);
-        controller.update(dt);
+        // Update game using elapsed time.
+        const float deltaTime = deltaClock.restart().asSeconds();
+        controller.update(deltaTime);
 
-        window.clear(sf::Color(18, 18, 18));
+        // Calculate FPS every second.
+        ++frameCount;
 
-        // Draw play area boundary
-        sf::RectangleShape border(sf::Vector2f(windowWidth - 2.f, windowHeight - 2.f));
-        border.setPosition(1.f, 1.f);
-        border.setFillColor(sf::Color::Transparent);
-        border.setOutlineThickness(1.f);
-        border.setOutlineColor(sf::Color(60, 60, 60));
-        window.draw(border);
+        const float fpsElapsed = fpsClock.getElapsedTime().asSeconds();
 
-        // Draw food
-        const auto foodPos = controller.getFoodManager().position();
-        if (foodPos.has_value())
+        if (fpsElapsed >= 1.f)
         {
-            sf::CircleShape foodShape(cellSize * 0.45f);
-            foodShape.setPosition(foodPos->x * cellSize + cellSize * 0.05f,
-                                  foodPos->y * cellSize + cellSize * 0.05f);
-            foodShape.setFillColor(sf::Color(230, 50, 50));
-            window.draw(foodShape);
+            currentFPS = static_cast<float>(frameCount) / fpsElapsed;
+
+            frameCount = 0;
+            fpsClock.restart();
         }
 
-        // Draw snake
-        for (const auto& segment : controller.getSnake().getBody())
+        window.clear(sf::Color(25, 25, 25));
+
+        // Draw vertical grid lines.
+        for (unsigned int x = 0; x <= WINDOW_WIDTH; x += CELL_SIZE)
         {
-            window.draw(segment);
+            sf::Vertex line[] = {
+                sf::Vertex(
+                    sf::Vector2f(static_cast<float>(x), 0.f),
+                    sf::Color(45, 45, 45)
+                ),
+                sf::Vertex(
+                    sf::Vector2f(
+                        static_cast<float>(x),
+                        static_cast<float>(WINDOW_HEIGHT)
+                    ),
+                    sf::Color(45, 45, 45)
+                )
+            };
+
+            window.draw(line, 2, sf::Lines);
         }
 
-        // Draw UI and HUD
+        // Draw horizontal grid lines.
+        for (unsigned int y = 0; y <= WINDOW_HEIGHT; y += CELL_SIZE)
+        {
+            sf::Vertex line[] = {
+                sf::Vertex(
+                    sf::Vector2f(0.f, static_cast<float>(y)),
+                    sf::Color(45, 45, 45)
+                ),
+                sf::Vertex(
+                    sf::Vector2f(
+                        static_cast<float>(WINDOW_WIDTH),
+                        static_cast<float>(y)
+                    ),
+                    sf::Color(45, 45, 45)
+                )
+            };
+
+            window.draw(line, 2, sf::Lines);
+        }
+
+        // Draw food and snake.
+        drawFood(window, controller.getFoodManager());
+        drawSnake(window, controller.getSnake());
+
         if (fontLoaded)
         {
-            if (controller.getState() == snakegame::GameState::Playing)
-            {
-                sf::Text scoreText;
-                scoreText.setFont(font);
-                scoreText.setCharacterSize(20);
-                scoreText.setFillColor(sf::Color::White);
-                scoreText.setString("Score: " + std::to_string(controller.getScore()));
-                scoreText.setPosition(15.f, 10.f);
-                window.draw(scoreText);
+            // Score display.
+            drawText(
+                window,
+                font,
+                "Score: " + std::to_string(controller.getScore()),
+                20,
+                10.f,
+                10.f
+            );
 
-                sf::Text bestText;
-                bestText.setFont(font);
-                bestText.setCharacterSize(20);
-                bestText.setFillColor(sf::Color(255, 215, 0));
-                bestText.setString("Best: " + std::to_string(controller.getBestScore()));
-                const auto bestBounds = bestText.getLocalBounds();
-                bestText.setPosition(windowWidth - bestBounds.width - 15.f, 10.f);
-                window.draw(bestText);
-            }
-            else if (controller.getState() == snakegame::GameState::Ready)
+            drawText(
+                window,
+                font,
+                "Best: " + std::to_string(controller.getBestScore()),
+                20,
+                10.f,
+                35.f
+            );
+
+            // FPS display in the top-right corner.
+            drawText(
+                window,
+                font,
+                "FPS: " + std::to_string(
+                    static_cast<int>(currentFPS)
+                ),
+                20,
+                700.f,
+                10.f,
+                sf::Color::Green
+            );
+
+            // Ready screen.
+            if (controller.getState() == snakegame::GameState::Ready)
             {
-                sf::RectangleShape overlay(sf::Vector2f(500.f, 260.f));
-                overlay.setOrigin(250.f, 130.f);
-                overlay.setPosition(windowWidth / 2.f, windowHeight / 2.f);
+                sf::RectangleShape overlay(sf::Vector2f(460.f, 220.f));
+
                 overlay.setFillColor(sf::Color(0, 0, 0, 210));
-                overlay.setOutlineThickness(2.f);
-                overlay.setOutlineColor(sf::Color(70, 200, 100));
+                overlay.setPosition(170.f, 190.f);
+
                 window.draw(overlay);
 
-                sf::Text titleText;
-                titleText.setFont(font);
-                titleText.setCharacterSize(36);
-                titleText.setFillColor(sf::Color::Yellow);
-                titleText.setStyle(sf::Text::Bold);
-                titleText.setString("SNAKE GAME");
-                const auto titleBounds = titleText.getLocalBounds();
-                titleText.setPosition(windowWidth / 2.f - titleBounds.width / 2.f,
-                                      windowHeight / 2.f - 100.f);
-                window.draw(titleText);
+                drawCenteredText(
+                    window, font, "SNAKE GAME",
+                    42, 245.f, sf::Color::Yellow
+                );
 
-                sf::Text promptText;
-                promptText.setFont(font);
-                promptText.setCharacterSize(22);
-                promptText.setFillColor(sf::Color::White);
-                promptText.setString("Press ENTER or SPACE to Start");
-                const auto promptBounds = promptText.getLocalBounds();
-                promptText.setPosition(windowWidth / 2.f - promptBounds.width / 2.f,
-                                       windowHeight / 2.f - 30.f);
-                window.draw(promptText);
+                drawCenteredText(
+                    window, font, "Press ENTER or SPACE to Start",
+                    20, 315.f
+                );
 
-                sf::Text controlsText;
-                controlsText.setFont(font);
-                controlsText.setCharacterSize(16);
-                controlsText.setFillColor(sf::Color(180, 180, 180));
-                controlsText.setString("Controls: Arrow Keys to Move | ESC to Exit");
-                const auto controlsBounds = controlsText.getLocalBounds();
-                controlsText.setPosition(windowWidth / 2.f - controlsBounds.width / 2.f,
-                                         windowHeight / 2.f + 30.f);
-                window.draw(controlsText);
+                drawCenteredText(
+                    window, font, "Use Arrow Keys to Move",
+                    18, 355.f
+                );
 
-                sf::Text tipText;
-                tipText.setFont(font);
-                tipText.setCharacterSize(14);
-                tipText.setFillColor(sf::Color(140, 140, 140));
-                tipText.setString("Eat red food to grow | Avoid walls & self-collision");
-                const auto tipBounds = tipText.getLocalBounds();
-                tipText.setPosition(windowWidth / 2.f - tipBounds.width / 2.f,
-                                    windowHeight / 2.f + 65.f);
-                window.draw(tipText);
+                drawCenteredText(
+                    window, font, "Eat food and avoid collisions!",
+                    16, 390.f, sf::Color::Green
+                );
             }
-            else if (controller.getState() == snakegame::GameState::GameOver)
+
+            // Game Over screen.
+            if (controller.getState() == snakegame::GameState::GameOver)
             {
-                sf::RectangleShape overlay(sf::Vector2f(500.f, 260.f));
-                overlay.setOrigin(250.f, 130.f);
-                overlay.setPosition(windowWidth / 2.f, windowHeight / 2.f);
+                sf::RectangleShape overlay(sf::Vector2f(460.f, 260.f));
+
                 overlay.setFillColor(sf::Color(0, 0, 0, 220));
-                overlay.setOutlineThickness(2.f);
-                overlay.setOutlineColor(sf::Color(220, 50, 50));
+                overlay.setPosition(170.f, 170.f);
+
                 window.draw(overlay);
 
-                sf::Text overText;
-                overText.setFont(font);
-                overText.setCharacterSize(38);
-                overText.setFillColor(sf::Color(240, 60, 60));
-                overText.setStyle(sf::Text::Bold);
-                overText.setString("GAME OVER");
-                const auto overBounds = overText.getLocalBounds();
-                overText.setPosition(windowWidth / 2.f - overBounds.width / 2.f,
-                                     windowHeight / 2.f - 105.f);
-                window.draw(overText);
+                drawCenteredText(
+                    window, font, "GAME OVER",
+                    42, 225.f, sf::Color::Red
+                );
 
-                std::string reason = "Collision Detected!";
-                if (controller.getLastCollision() == snakegame::CollisionType::Boundary)
+                std::string reason = "Collision detected";
+
+                if (controller.getLastCollision() ==
+                    snakegame::CollisionType::Boundary)
                 {
-                    reason = "Wall Collision!";
+                    reason = "You hit the boundary!";
                 }
-                else if (controller.getLastCollision() == snakegame::CollisionType::Self)
+                else if (controller.getLastCollision() ==
+                         snakegame::CollisionType::Self)
                 {
-                    reason = "Self-Collision!";
+                    reason = "You hit yourself!";
                 }
-                sf::Text reasonText;
-                reasonText.setFont(font);
-                reasonText.setCharacterSize(18);
-                reasonText.setFillColor(sf::Color(220, 180, 180));
-                reasonText.setString(reason);
-                const auto reasonBounds = reasonText.getLocalBounds();
-                reasonText.setPosition(windowWidth / 2.f - reasonBounds.width / 2.f,
-                                       windowHeight / 2.f - 55.f);
-                window.draw(reasonText);
 
-                sf::Text scoreText;
-                scoreText.setFont(font);
-                scoreText.setCharacterSize(24);
-                scoreText.setFillColor(sf::Color::Yellow);
-                scoreText.setString("Final Score: " + std::to_string(controller.getScore()));
-                const auto scoreBounds = scoreText.getLocalBounds();
-                scoreText.setPosition(windowWidth / 2.f - scoreBounds.width / 2.f,
-                                      windowHeight / 2.f - 15.f);
-                window.draw(scoreText);
+                drawCenteredText(
+                    window, font, reason,
+                    20, 285.f
+                );
 
-                sf::Text bestText;
-                bestText.setFont(font);
-                bestText.setCharacterSize(18);
-                bestText.setFillColor(sf::Color(255, 215, 0));
-                bestText.setString("Best Score: " + std::to_string(controller.getBestScore()));
-                const auto bestBounds = bestText.getLocalBounds();
-                bestText.setPosition(windowWidth / 2.f - bestBounds.width / 2.f,
-                                     windowHeight / 2.f + 18.f);
-                window.draw(bestText);
+                drawCenteredText(
+                    window, font,
+                    "Final Score: " + std::to_string(controller.getScore()),
+                    22, 325.f, sf::Color::Yellow
+                );
 
-                sf::Text restartText;
-                restartText.setFont(font);
-                restartText.setCharacterSize(20);
-                restartText.setFillColor(sf::Color::White);
-                restartText.setString("Press 'R' to Restart");
-                const auto restartBounds = restartText.getLocalBounds();
-                restartText.setPosition(windowWidth / 2.f - restartBounds.width / 2.f,
-                                        windowHeight / 2.f + 50.f);
-                window.draw(restartText);
+                drawCenteredText(
+                    window, font,
+                    "Best Score: " + std::to_string(controller.getBestScore()),
+                    18, 360.f
+                );
 
-                sf::Text exitText;
-                exitText.setFont(font);
-                exitText.setCharacterSize(15);
-                exitText.setFillColor(sf::Color(160, 160, 160));
-                exitText.setString("Press ESC to Exit");
-                const auto exitBounds = exitText.getLocalBounds();
-                exitText.setPosition(windowWidth / 2.f - exitBounds.width / 2.f,
-                                     windowHeight / 2.f + 88.f);
-                window.draw(exitText);
+                drawCenteredText(
+                    window, font, "Press R to Restart",
+                    18, 400.f
+                );
+
+                drawCenteredText(
+                    window, font, "Press ESC to Exit",
+                    16, 430.f
+                );
             }
-            else if (controller.getState() == snakegame::GameState::RoundComplete)
+
+            // Round completed screen.
+            if (controller.getState() == snakegame::GameState::RoundComplete)
             {
-                sf::RectangleShape overlay(sf::Vector2f(500.f, 220.f));
-                overlay.setOrigin(250.f, 110.f);
-                overlay.setPosition(windowWidth / 2.f, windowHeight / 2.f);
+                sf::RectangleShape overlay(sf::Vector2f(460.f, 220.f));
+
                 overlay.setFillColor(sf::Color(0, 0, 0, 220));
-                overlay.setOutlineThickness(2.f);
-                overlay.setOutlineColor(sf::Color::Yellow);
+                overlay.setPosition(170.f, 190.f);
+
                 window.draw(overlay);
 
-                sf::Text winText;
-                winText.setFont(font);
-                winText.setCharacterSize(32);
-                winText.setFillColor(sf::Color::Yellow);
-                winText.setStyle(sf::Text::Bold);
-                winText.setString("BOARD FULL! YOU WIN!");
-                const auto winBounds = winText.getLocalBounds();
-                winText.setPosition(windowWidth / 2.f - winBounds.width / 2.f,
-                                    windowHeight / 2.f - 80.f);
-                window.draw(winText);
+                drawCenteredText(
+                    window, font, "ROUND COMPLETE!",
+                    36, 250.f, sf::Color::Green
+                );
 
-                sf::Text scoreText;
-                scoreText.setFont(font);
-                scoreText.setCharacterSize(24);
-                scoreText.setFillColor(sf::Color::White);
-                scoreText.setString("Final Score: " + std::to_string(controller.getScore()));
-                const auto scoreBounds = scoreText.getLocalBounds();
-                scoreText.setPosition(windowWidth / 2.f - scoreBounds.width / 2.f,
-                                      windowHeight / 2.f - 20.f);
-                window.draw(scoreText);
+                drawCenteredText(
+                    window, font,
+                    "Final Score: " + std::to_string(controller.getScore()),
+                    22, 315.f, sf::Color::Yellow
+                );
 
-                sf::Text bestText;
-                bestText.setFont(font);
-                bestText.setCharacterSize(18);
-                bestText.setFillColor(sf::Color(255, 215, 0));
-                bestText.setString("Best Score: " + std::to_string(controller.getBestScore()));
-                const auto bestBounds = bestText.getLocalBounds();
-                bestText.setPosition(windowWidth / 2.f - bestBounds.width / 2.f,
-                                     windowHeight / 2.f + 14.f);
-                window.draw(bestText);
-
-                sf::Text restartText;
-                restartText.setFont(font);
-                restartText.setCharacterSize(20);
-                restartText.setFillColor(sf::Color::Green);
-                restartText.setString("Press 'R' to Restart");
-                const auto restartBounds = restartText.getLocalBounds();
-                restartText.setPosition(windowWidth / 2.f - restartBounds.width / 2.f,
-                                        windowHeight / 2.f + 50.f);
-                window.draw(restartText);
+                drawCenteredText(
+                    window, font, "Press R to Play Again",
+                    18, 365.f
+                );
             }
         }
 
