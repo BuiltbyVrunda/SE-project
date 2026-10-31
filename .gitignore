@@ -1,3 +1,4 @@
-.vs/
-out/
-build/
+/build*/
+/.vs/
+/out/
+.DS_Store
