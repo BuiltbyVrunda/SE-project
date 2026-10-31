@@ -3,8 +3,11 @@
 
 int main()
 {
+    const unsigned int windowWidth = 800;
+    const unsigned int windowHeight = 600;
+
     sf::RenderWindow window(
-        sf::VideoMode(800, 600),
+        sf::VideoMode(windowWidth, windowHeight),
         "Snake Game"
     );
 
@@ -13,7 +16,8 @@ int main()
     Snake snake;
     sf::Clock movementClock;
 
-    const float movementInterval = 0.15f;
+    const sf::Time movementInterval =
+        sf::milliseconds(150);
 
     while (window.isOpen())
     {
@@ -30,34 +34,36 @@ int main()
                 switch (event.key.code)
                 {
                 case sf::Keyboard::Up:
-                    snake.changeDirection({ 0.f, -20.f });
+                    snake.changeDirection({0.f, -20.f});
                     break;
 
                 case sf::Keyboard::Down:
-                    snake.changeDirection({ 0.f, 20.f });
+                    snake.changeDirection({0.f, 20.f});
                     break;
 
                 case sf::Keyboard::Left:
-                    snake.changeDirection({ -20.f, 0.f });
+                    snake.changeDirection({-20.f, 0.f});
                     break;
 
                 case sf::Keyboard::Right:
-                    snake.changeDirection({ 20.f, 0.f });
+                    snake.changeDirection({20.f, 0.f});
                     break;
 
                 default:
-                    // Unsupported keys are safely ignored.
+                    // Ignore unsupported keys.
                     break;
                 }
             }
         }
 
-        if (movementClock.getElapsedTime().asSeconds() >= movementInterval)
+        // Move the snake at regular intervals.
+        if (movementClock.getElapsedTime() >= movementInterval)
         {
             snake.move();
             movementClock.restart();
         }
 
+        // Draw the game.
         window.clear(sf::Color::Black);
 
         for (const auto& segment : snake.getBody())
