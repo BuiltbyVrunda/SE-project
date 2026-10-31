@@ -7,7 +7,7 @@ A software engineering project developed as part of the Software Engineering cou
 | Name | SRN | Primary Responsibilities | Modules |
 | :--- | :--- | :--- | :--- |
 | **Yele Charan** | PES1UG25CS856 | SRS, snake movement logic, direction validation | `src/snake.h`, `src/snake.cpp`, `tests/snake_test.cpp` |
-| **Vrunda C** | PES1UG24CS541 | Test plan, food generation, growth, scoring | `src/food_manager.h`, `src/food_manager.cpp` |
+| **Vrunda C** | PES1UG24CS541 | Test plan, food generation, growth, scoring | `src/food_manager.h`, `src/food_manager.cpp`, `src/score_manager.h`, `src/score_manager.cpp`, `tests/food_score_test.cpp`, `tests/food_score_integration_test.cpp`, `reports/food_scoring_validation.md` |
 | **Ved Mudkavi** | PES1UG24CS522 | Architecture & design, collision detection | `src/collision_detector.h`, `src/collision_detector.cpp`, `tests/collision_detector_test.cpp` |
 | **Tushar N** | PES1UG24CS504 | Integration, lifecycle, Game Controller, UI, CI/CD | `src/game_controller.h`, `src/game_controller.cpp`, `src/main.cpp`, `tests/game_integration_test.cpp`, `.github/workflows/ci.yml` |
 
@@ -52,11 +52,12 @@ The application follows a modular architecture separating presentation, domain r
 - Enforces direction validation: rejects immediate 180-degree reversals and rapid multi-key turn reversals within the same movement tick using an input latch.
 - Supports atomic advancement and growth (`advance(bool growSnake)`).
 
-### 2. Food Placement & Scoring (`src/food_manager.h`, `src/food_manager.cpp`)
+### 2. Food Placement & Scoring (`src/food_manager.*`, `src/score_manager.*`)
 - Places food randomly strictly on unoccupied grid cells (`place(bounds, body, rng)`).
 - Eliminates infinite random retry loops by identifying free cells directly.
 - Detects board saturation (`PlacementResult::BoardFull`).
-- Awards 10 points per food item and triggers snake growth by 1 segment.
+- Food on the snake's next head cell triggers growth by 1 segment.
+- `ScoreManager` awards 10 points per food item, counts foods eaten, and keeps the best score of the session across restarts (shown as "Best" in the HUD and on the end screens).
 
 ### 3. Collision Detection (`src/collision_detector.h`, `src/collision_detector.cpp`)
 - Pure domain logic with zero SFML dependencies.
@@ -73,8 +74,8 @@ The application follows a modular architecture separating presentation, domain r
   3. Query food presence at candidate head (`willGrow`).
   4. Perform collision check with candidate head and `willGrow` flag.
   5. If fatal collision occurs (`Boundary` or `Self`), immediately enter `GameOver`, leaving snake and score intact.
-  6. If safe (`None`), commit snake advancement (`advance(willGrow)`), increment score by 10, and request replacement food.
-- Handles atomic restart: resets snake to initial 3 segments at `(5, 5)`, direction to Right, score to 0, regenerates food on a free cell, and clears game-over state.
+  6. If safe (`None`), commit snake advancement (`advance(willGrow)`); on food, add 10 points through `ScoreManager` and request replacement food.
+- Handles atomic restart: resets snake to initial 3 segments at `(5, 5)`, direction to Right, score to 0 (best score is kept), regenerates food on a free cell, and clears game-over state.
 
 ---
 
@@ -134,15 +135,17 @@ build\SnakeGame.exe
 
 ## Automated Test Suites
 
-The repository contains automated tests across three targets, covering all functional requirements:
+The repository contains automated tests across five targets, covering all functional requirements:
 
 | Test Target | Framework | Description | Coverage |
 | :--- | :--- | :--- | :--- |
 | `collision_tests` | Google Test | Pure collision detector verification | 23 tests covering wall collisions, valid cells, tail rules, TC-05 fixtures, invalid bounds |
 | `SnakeTests` | Standalone | Charan's snake movement tests | 6 tests covering initial direction, turns, reversal rejection, forward step |
 | `game_integration_tests` | Google Test | Integrated game controller and food logic | 10 tests covering all 12 required scenarios, food manager logic, and restart lifecycle |
+| `food_score_tests` | Google Test | Food placement and scoring unit tests (TC-03, TC-04) | 19 tests covering placement over 500 seeds, last-free-cell, board full, detection, score and best-score rules |
+| `food_score_integration_tests` | Google Test | Food, growth and scoring through the game controller | 10 tests covering growth by one, single consumption per food, 5-food score, replacement food, best score across restart |
 
-To run all 39 tests:
+To run all 68 tests:
 ```sh
 ctest --test-dir build --output-on-failure --verbose
 ```
