@@ -17,6 +17,9 @@ target_include_directories(snake_collision PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/s
 add_library(snake_food src/food_manager.cpp)
 target_include_directories(snake_food PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+add_library(snake_score src/score_manager.cpp)
+target_include_directories(snake_score PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
 option(BUILD_GAME "Build the SFML game and movement module" ON)
 if(BUILD_GAME)
     # Use SFML_DIR or CMAKE_PREFIX_PATH for non-standard installations.
@@ -28,7 +31,7 @@ if(BUILD_GAME)
 
     add_library(snake_controller src/game_controller.cpp)
     target_include_directories(snake_controller PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
-    target_link_libraries(snake_controller PUBLIC snake snake_food snake_collision)
+    target_link_libraries(snake_controller PUBLIC snake snake_food snake_score snake_collision)
 
     add_executable(SnakeGame src/main.cpp)
     target_link_libraries(SnakeGame PRIVATE snake_controller)

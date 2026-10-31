@@ -7,11 +7,11 @@ GameController::GameController(BoardBounds bounds, float moveInterval)
     : bounds(bounds),
       movementInterval(moveInterval),
       timeAccumulator(0.f),
-      score(0),
       state(GameState::Ready),
       lastCollision(CollisionType::None),
       snake(),
       foodManager(),
+      scoreManager(),
       collisionDetector()
 {
     // Pre-place food so it is visible in the Ready state
@@ -34,7 +34,7 @@ void GameController::startRound()
 void GameController::restart()
 {
     snake.reset();
-    score = 0;
+    scoreManager.resetRound(); // best score is kept across restarts
     timeAccumulator = 0.f;
     lastCollision = CollisionType::None;
 
@@ -98,7 +98,7 @@ bool GameController::step()
     // 6. Food consumption & score update
     if (willGrow)
     {
-        score += 10;
+        scoreManager.addFoodPoints();
         const PlacementResult pres = foodManager.place(bounds, snake.getGridBody());
         if (pres == PlacementResult::BoardFull)
         {
@@ -116,7 +116,17 @@ GameState GameController::getState() const
 
 int GameController::getScore() const
 {
-    return score;
+    return scoreManager.getScore();
+}
+
+int GameController::getBestScore() const
+{
+    return scoreManager.getBestScore();
+}
+
+int GameController::getFoodsEaten() const
+{
+    return scoreManager.getFoodsEaten();
 }
 
 BoardBounds GameController::getBounds() const
@@ -152,6 +162,11 @@ const FoodManager& GameController::getFoodManager() const
 FoodManager& GameController::getFoodManager()
 {
     return foodManager;
+}
+
+const ScoreManager& GameController::getScoreManager() const
+{
+    return scoreManager;
 }
 
 } // namespace snakegame
