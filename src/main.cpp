@@ -124,6 +124,11 @@ int main()
 
     sf::Clock deltaClock;
 
+    // FPS measurement variables
+    sf::Clock fpsClock;
+    unsigned int frameCount = 0;
+    float currentFPS = 0.f;
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -191,6 +196,19 @@ int main()
         const float deltaTime = deltaClock.restart().asSeconds();
         controller.update(deltaTime);
 
+        // Calculate FPS every second.
+        ++frameCount;
+
+        const float fpsElapsed = fpsClock.getElapsedTime().asSeconds();
+
+        if (fpsElapsed >= 1.f)
+        {
+            currentFPS = static_cast<float>(frameCount) / fpsElapsed;
+
+            frameCount = 0;
+            fpsClock.restart();
+        }
+
         window.clear(sf::Color(25, 25, 25));
 
         // Draw vertical grid lines.
@@ -256,6 +274,19 @@ int main()
                 20,
                 10.f,
                 35.f
+            );
+
+            // FPS display in the top-right corner.
+            drawText(
+                window,
+                font,
+                "FPS: " + std::to_string(
+                    static_cast<int>(currentFPS)
+                ),
+                20,
+                700.f,
+                10.f,
+                sf::Color::Green
             );
 
             // Ready screen.
@@ -378,4 +409,3 @@ int main()
 
     return 0;
 }
-
