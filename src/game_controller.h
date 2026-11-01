@@ -4,6 +4,7 @@
 #include "collision_detector.h"
 #include "food_manager.h"
 #include "grid_types.h"
+#include "score_manager.h"
 #include "snake.h"
 
 namespace snakegame {
@@ -35,6 +36,8 @@ public:
     // Accessors
     [[nodiscard]] GameState getState() const;
     [[nodiscard]] int getScore() const;
+    [[nodiscard]] int getBestScore() const;
+    [[nodiscard]] int getFoodsEaten() const;
     [[nodiscard]] BoardBounds getBounds() const;
     [[nodiscard]] float getMovementInterval() const;
     [[nodiscard]] CollisionType getLastCollision() const;
@@ -45,16 +48,18 @@ public:
     [[nodiscard]] const FoodManager& getFoodManager() const;
     [[nodiscard]] FoodManager& getFoodManager();
 
+    [[nodiscard]] const ScoreManager& getScoreManager() const;
+
 private:
     BoardBounds bounds;
     float movementInterval;
     float timeAccumulator;
-    int score;
     GameState state;
     CollisionType lastCollision;
 
     Snake snake;
     FoodManager foodManager;
+    ScoreManager scoreManager;
     CollisionDetector collisionDetector;
 };
 
