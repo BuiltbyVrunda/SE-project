@@ -49,3 +49,28 @@ full manual TC-05 as passed from these automated results alone.
 On a working graphical test machine, collect food, hit a wall or the body, check
 that Game Over displays the earned score and the snake remains still, then press
 R and confirm the reset round and zero score. Record that result separately.
+
+## Final check on 1 November 2026
+
+Pulled main `0615642` (the merged FPS/food/scoring updates) into the review branch
+and retained the corrected tail and four-wall tests. After rebuilding, **73/73
+CTest checks passed** in Debug on macOS arm64 with SFML 2.6.2. The additional
+food/scoring suites account for the increase from the earlier 44 checks.
+
+The earlier graphics-launch limitation was overcome by launching a native Mac
+app bundle. That exposed a separate font-path problem: the game searched relative
+to the launch folder and could show the board without text. This change packages
+the font in the Mac app, checks fixed paths relative to the executable, and
+exits with a clear error if no usable font is found.
+
+Visual observation: the game displayed a boundary Game Over screen with both
+HUD score and final score at 40, and a visible FPS counter reading 56. Ved played
+the game and explicitly confirmed that a wall collision showed Game Over and
+pressing R started a new round with score 0. Those wall/UI/restart checks are now
+confirmed. Self-collision, all four boundaries and the departing-tail rule are
+also covered by the automated tests; this is not a claim of a separate manual
+self-collision demonstration.
+
+The single FPS observation is not a measured 60-second average. TC-08 performance
+measurement and the wider final Test Plan remain separate team work. No demo
+video was recorded by this check.

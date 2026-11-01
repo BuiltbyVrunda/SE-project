@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -10,9 +11,12 @@ namespace
     constexpr unsigned int WINDOW_WIDTH = 800;
     constexpr unsigned int WINDOW_HEIGHT = 600;
 
-    bool loadGameFont(sf::Font& font)
+    bool loadGameFont(sf::Font& font, const std::filesystem::path& executableDirectory)
     {
-        const std::string fontPaths[] = {
+        const std::filesystem::path fontPaths[] = {
+            executableDirectory / "assets/arial.ttf",
+            executableDirectory.parent_path() / "Resources/assets/arial.ttf",
+            executableDirectory.parent_path() / "assets/arial.ttf",
             "assets/arial.ttf",
             "C:/Windows/Fonts/arial.ttf",
             "C:/Windows/Fonts/segoeui.ttf",
@@ -21,7 +25,9 @@ namespace
 
         for (const auto& path : fontPaths)
         {
-            if (font.loadFromFile(path))
+            std::error_code error;
+            if (std::filesystem::is_regular_file(path, error) &&
+                font.loadFromFile(path.string()))
             {
                 return true;
             }
@@ -108,7 +114,7 @@ namespace
     }
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     sf::RenderWindow window(
         sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT),
@@ -117,8 +123,22 @@ int main()
 
     window.setFramerateLimit(60);
 
+    std::filesystem::path executableDirectory;
+    if (argc > 0 && argv[0])
+    {
+        std::error_code error;
+        const auto executable = std::filesystem::absolute(argv[0], error);
+        if (!error)
+            executableDirectory = executable.parent_path();
+    }
+
     sf::Font font;
-    const bool fontLoaded = loadGameFont(font);
+    const bool fontLoaded = loadGameFont(font, executableDirectory);
+    if (!fontLoaded)
+    {
+        std::cerr << "Unable to load the game font. Check the packaged assets folder.\n";
+        return 1;
+    }
 
     snakegame::GameController controller({40, 30}, 0.15f);
 
