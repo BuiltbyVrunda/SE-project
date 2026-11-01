@@ -97,3 +97,18 @@ The SAD has the required architecture pattern, component descriptions,
 security discussion, requirement mappings, two sequence diagrams, interfaces,
 error-handling and UX sections. Its traceability table includes all 18 FRs,
 6 NFRs and 5 SRs. Actual acceptance results belong in the Test Plan/RTM.
+
+## Follow-up on 1 November 2026
+
+The later main revision `0615642` adds a separate `ScoreManager`, food/scoring
+tests, an in-memory best score and the FPS display. GameController now delegates
+current score, best score and food count to its owned ScoreManager. Best score
+survives a round reset but is not written to disk; record it as an addition to
+the original design scope. The pre-movement collision/food/growth sequence is
+unchanged.
+
+This review branch now packages the font in the native Mac app, resolves its
+fixed paths relative to the executable and terminates if no font loads. This
+addresses the font-failure finding above. The initialization/exception/close-path
+findings are not claimed fixed. See `collision_integration_validation.md` for
+the 73-check result and the newly confirmed wall/Game Over/restart screen checks.
