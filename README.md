@@ -180,3 +180,19 @@ A GitHub Actions workflow is configured under `.github/workflows/ci.yml`.
 1. **Local Desktop Application:** The game is designed for local single-player execution; network multiplayer and online leaderboards are out of scope.
 2. **SFML Version:** Developed and tested against SFML 2.6.x. SFML 3.x is not supported due to breaking API changes.
 3. **Display Requirement for Game Launch:** Playing the interactive graphical game requires a desktop display environment; automated logic tests run headlessly in CI without graphical display dependencies.
+
+### macOS launch
+
+With SFML 2 installed and discoverable through `SFML_DIR` or `CMAKE_PREFIX_PATH`,
+use the same CMake build commands above. CMake creates
+`build-game/SnakeGame.app` when the build directory is `build-game`.
+Launch it with:
+
+```sh
+open build-game/SnakeGame.app
+```
+
+The app includes its font in `Contents/Resources/assets`. Font lookup also works
+relative to the executable for terminal and Windows launches, so it does not
+require launching from the repository folder. SFML 2 runtime libraries must
+still be installed; this is not a standalone bundle of all dependencies.

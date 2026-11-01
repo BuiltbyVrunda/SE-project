@@ -264,37 +264,100 @@ TEST(GameIntegrationTest, Scenario11_ContinuedGameplayAfterRestart) {
     EXPECT_EQ(controller.getState(), GameState::Playing);
 }
 
-// Scenario 12: Regression testing of collision detector integration
+// Scenario 12: Enter the tail's actual current cell on a non-growing move.
 TEST(GameIntegrationTest, Scenario12_TailDepartureRuleIntegration) {
-    // SAD TC-05: Entering departing tail on a non-growing move is SAFE
     GameController controller({20, 20});
     controller.startRound();
-
-    // Snake: (5,5), (4,5), (3,5), (2,5)
     controller.getFoodManager().setPosition(Cell{6, 5});
-    controller.step(); // Grows to 4 segments: (6,5), (5,5), (4,5), (3,5)
+    ASSERT_TRUE(controller.step()); // Length four, head at (6,5).
+    controller.getFoodManager().setPosition(Cell{0, 0});
 
-    // Form a loop: Up, Left, Down towards the cell (3,5)
-    controller.getFoodManager().setPosition(Cell{0, 0}); // No food on route
+    ASSERT_TRUE(controller.handleDirectionInput({0.f, -20.f}));
+    ASSERT_TRUE(controller.step()); // (6,4)
+    ASSERT_TRUE(controller.handleDirectionInput({-20.f, 0.f}));
+    ASSERT_TRUE(controller.step()); // (5,4)
+    ASSERT_TRUE(controller.handleDirectionInput({0.f, 20.f}));
 
-    controller.handleDirectionInput({0.f, -20.f}); // Up -> (6, 4)
-    controller.step();
-    controller.handleDirectionInput({-20.f, 0.f}); // Left -> (5, 4)
-    controller.step();
-    controller.handleDirectionInput({-20.f, 0.f}); // Left -> (4, 4)
-    controller.step();
-    controller.handleDirectionInput({-20.f, 0.f}); // Left -> (3, 4)
-    controller.step();
-
-    // Now head is at (3, 4). The tail is at (3, 5).
-    // Turn Down into (3, 5):
-    controller.handleDirectionInput({0.f, 20.f});
-
-    // Case A: NON-growing move -> Tail vacates (3, 5), move is SAFE!
-    EXPECT_FALSE(controller.getFoodManager().isAt(Cell{3, 5}));
+    const Cell departingTail = controller.getSnake().getGridBody().back();
+    ASSERT_EQ(departingTail, (Cell{5, 5}));
+    ASSERT_EQ(controller.getSnake().getNextHeadGrid(), departingTail);
+    ASSERT_FALSE(controller.getFoodManager().isAt(departingTail));
     EXPECT_TRUE(controller.step());
     EXPECT_EQ(controller.getState(), GameState::Playing);
-    EXPECT_EQ(controller.getSnake().getGridBody().front(), (Cell{3, 5}));
+    EXPECT_EQ(controller.getSnake().getGridBody().front(), departingTail);
+    EXPECT_EQ(controller.getSnake().getGridBody().size(), 4u);
+}
+
+class WallIntegrationTest : public ::testing::TestWithParam<Cell> {};
+
+TEST_P(WallIntegrationTest, StopsBeforeEachWallAndIgnoresFurtherMovement) {
+    GameController controller({10, 10});
+    controller.startRound();
+    controller.getFoodManager().setPosition(Cell{0, 0});
+    const Cell direction = GetParam();
+    // Turn up once before heading left, avoiding an immediate reverse.
+    if (direction.x == -1) {
+        ASSERT_TRUE(controller.handleDirectionInput({0.f, -20.f}));
+        ASSERT_TRUE(controller.step());
+    }
+    ASSERT_TRUE(controller.handleDirectionInput(
+        {direction.x * 20.f, direction.y * 20.f}));
+
+    Body bodyBefore;
+    int moves = 0;
+    while (controller.getState() == GameState::Playing && moves++ < 20) {
+        bodyBefore = controller.getSnake().getGridBody();
+        controller.step();
+    }
+    ASSERT_EQ(controller.getState(), GameState::GameOver);
+    EXPECT_EQ(controller.getLastCollision(), CollisionType::Boundary);
+    EXPECT_EQ(controller.getSnake().getGridBody(), bodyBefore);
+    EXPECT_FALSE(controller.step());
+    EXPECT_FALSE(controller.handleDirectionInput({0.f, -20.f}));
+    controller.update(1.0f);
+    EXPECT_EQ(controller.getSnake().getGridBody(), bodyBefore);
+}
+
+INSTANTIATE_TEST_SUITE_P(AllFourWalls, WallIntegrationTest,
+    ::testing::Values(Cell{1, 0}, Cell{-1, 0}, Cell{0, -1}, Cell{0, 1}));
+
+TEST(GameIntegrationTest, FatalCollisionKeepsEarnedScoreAndRestartClearsIt) {
+    GameController controller({10, 10});
+    controller.startRound();
+    controller.getFoodManager().setPosition(Cell{6, 5});
+    ASSERT_TRUE(controller.step());
+    ASSERT_EQ(controller.getScore(), 10);
+    controller.getFoodManager().setPosition(Cell{0, 0});
+    for (int x = 7; x <= 9; ++x) {
+        ASSERT_TRUE(controller.step());
+    }
+    const Body lastValidBody = controller.getSnake().getGridBody();
+    ASSERT_FALSE(controller.step());
+    ASSERT_EQ(controller.getState(), GameState::GameOver);
+    EXPECT_EQ(controller.getScore(), 10);
+    EXPECT_EQ(controller.getSnake().getGridBody(), lastValidBody);
+    controller.update(2.f);
+    EXPECT_EQ(controller.getScore(), 10);
+    EXPECT_EQ(controller.getSnake().getGridBody(), lastValidBody);
+
+    controller.restart();
+    EXPECT_EQ(controller.getState(), GameState::Playing);
+    EXPECT_EQ(controller.getScore(), 0);
+    EXPECT_EQ(controller.getLastCollision(), CollisionType::None);
+    EXPECT_EQ(controller.getSnake().getGridBody(), (Body{{5, 5}, {4, 5}, {3, 5}}));
+    EXPECT_EQ(controller.getSnake().getDirection(), sf::Vector2f(20.f, 0.f));
+    ASSERT_TRUE(controller.getFoodManager().position().has_value());
+    const Cell food = *controller.getFoodManager().position();
+    EXPECT_GE(food.x, 0);
+    EXPECT_LT(food.x, 10);
+    EXPECT_GE(food.y, 0);
+    EXPECT_LT(food.y, 10);
+    for (Cell segment : controller.getSnake().getGridBody()) {
+        EXPECT_NE(food, segment);
+    }
+    controller.getFoodManager().setPosition(Cell{0, 0});
+    EXPECT_TRUE(controller.step());
+    EXPECT_EQ(controller.getSnake().getGridBody().front(), (Cell{6, 5}));
 }
 
 // FoodManager unit tests
