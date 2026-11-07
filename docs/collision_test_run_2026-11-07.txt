@@ -1,0 +1,151 @@
+Test project /Users/vedmudkavi/Documents/Codex/2026-09-28/snake-game-a-software-engineering-mini/work/SE-project/build-game
+      Start  1: CollisionDetectorTest.DetectsOccupiedNonTailCellWithAndWithoutGrowth
+ 1/73 Test  #1: CollisionDetectorTest.DetectsOccupiedNonTailCellWithAndWithoutGrowth ....................................................   Passed    0.02 sec
+      Start  2: CollisionDetectorTest.MatchesTC05NonTailCollisionFixture
+ 2/73 Test  #2: CollisionDetectorTest.MatchesTC05NonTailCollisionFixture ................................................................   Passed    0.00 sec
+      Start  3: CollisionDetectorTest.AllowsTC05DepartingTailOnNonGrowingMove
+ 3/73 Test  #3: CollisionDetectorTest.AllowsTC05DepartingTailOnNonGrowingMove ...........................................................   Passed    0.00 sec
+      Start  4: CollisionDetectorTest.TailRemainsOccupiedOnGrowingMove
+ 4/73 Test  #4: CollisionDetectorTest.TailRemainsOccupiedOnGrowingMove ..................................................................   Passed    0.00 sec
+      Start  5: CollisionDetectorTest.ChecksAllNonTailSegmentsOfLongSnake
+ 5/73 Test  #5: CollisionDetectorTest.ChecksAllNonTailSegmentsOfLongSnake ...............................................................   Passed    0.00 sec
+      Start  6: CollisionDetectorTest.HandlesSingleSegmentBody
+ 6/73 Test  #6: CollisionDetectorTest.HandlesSingleSegmentBody ..........................................................................   Passed    0.00 sec
+      Start  7: CollisionDetectorTest.DoesNotMutateBodyOnAnyOutcome
+ 7/73 Test  #7: CollisionDetectorTest.DoesNotMutateBodyOnAnyOutcome .....................................................................   Passed    0.00 sec
+      Start  8: CollisionDetectorTest.RejectsEmptyBodyWithoutUnderflow
+ 8/73 Test  #8: CollisionDetectorTest.RejectsEmptyBodyWithoutUnderflow ..................................................................   Passed    0.00 sec
+      Start  9: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <FF-FF FF-FF 04-00 00-00>
+ 9/73 Test  #9: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <FF-FF FF-FF 04-00 00-00> ...........   Passed    0.00 sec
+      Start 10: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <0A-00 00-00 04-00 00-00>
+10/73 Test #10: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <0A-00 00-00 04-00 00-00> ...........   Passed    0.00 sec
+      Start 11: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <05-00 00-00 FF-FF FF-FF>
+11/73 Test #11: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <05-00 00-00 FF-FF FF-FF> ...........   Passed    0.00 sec
+      Start 12: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <05-00 00-00 08-00 00-00>
+12/73 Test #12: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <05-00 00-00 08-00 00-00> ...........   Passed    0.00 sec
+      Start 13: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <00-00 00-80 04-00 00-00>
+13/73 Test #13: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <00-00 00-80 04-00 00-00> ...........   Passed    0.00 sec
+      Start 14: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <05-00 00-00 FF-FF FF-7F>
+14/73 Test #14: AllWalls/WallCollisionTest.RejectsOutOfBoundsHeadWithAndWithoutGrowth/8-byte object <05-00 00-00 FF-FF FF-7F> ...........   Passed    0.00 sec
+      Start 15: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <00-00 00-00 00-00 00-00>
+15/73 Test #15: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <00-00 00-00 00-00 00-00> ..............   Passed    0.00 sec
+      Start 16: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <09-00 00-00 00-00 00-00>
+16/73 Test #16: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <09-00 00-00 00-00 00-00> ..............   Passed    0.00 sec
+      Start 17: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <00-00 00-00 07-00 00-00>
+17/73 Test #17: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <00-00 00-00 07-00 00-00> ..............   Passed    0.00 sec
+      Start 18: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <09-00 00-00 07-00 00-00>
+18/73 Test #18: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <09-00 00-00 07-00 00-00> ..............   Passed    0.00 sec
+      Start 19: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <06-00 00-00 04-00 00-00>
+19/73 Test #19: InsideBoard/ValidCellTest.AcceptsFreeCellsIncludingEdgesAndCorners/8-byte object <06-00 00-00 04-00 00-00> ..............   Passed    0.00 sec
+      Start 20: NonPositiveDimensions/InvalidBoundsTest.RejectsInvalidConfiguration/8-byte object <00-00 00-00 08-00 00-00>
+20/73 Test #20: NonPositiveDimensions/InvalidBoundsTest.RejectsInvalidConfiguration/8-byte object <00-00 00-00 08-00 00-00> .............   Passed    0.00 sec
+      Start 21: NonPositiveDimensions/InvalidBoundsTest.RejectsInvalidConfiguration/8-byte object <0A-00 00-00 00-00 00-00>
+21/73 Test #21: NonPositiveDimensions/InvalidBoundsTest.RejectsInvalidConfiguration/8-byte object <0A-00 00-00 00-00 00-00> .............   Passed    0.00 sec
+      Start 22: NonPositiveDimensions/InvalidBoundsTest.RejectsInvalidConfiguration/8-byte object <FF-FF FF-FF 08-00 00-00>
+22/73 Test #22: NonPositiveDimensions/InvalidBoundsTest.RejectsInvalidConfiguration/8-byte object <FF-FF FF-FF 08-00 00-00> .............   Passed    0.00 sec
+      Start 23: NonPositiveDimensions/InvalidBoundsTest.RejectsInvalidConfiguration/8-byte object <0A-00 00-00 FF-FF FF-FF>
+23/73 Test #23: NonPositiveDimensions/InvalidBoundsTest.RejectsInvalidConfiguration/8-byte object <0A-00 00-00 FF-FF FF-FF> .............   Passed    0.00 sec
+      Start 24: FoodPlacementTest.NoFoodExistsBeforeFirstPlacement
+24/73 Test #24: FoodPlacementTest.NoFoodExistsBeforeFirstPlacement ......................................................................   Passed    0.02 sec
+      Start 25: FoodPlacementTest.FoodIsAlwaysInsideBoardAndOffSnakeForManySeeds
+25/73 Test #25: FoodPlacementTest.FoodIsAlwaysInsideBoardAndOffSnakeForManySeeds ........................................................   Passed    0.01 sec
+      Start 26: FoodPlacementTest.SameSeedGivesSamePositionForRepeatableTests
+26/73 Test #26: FoodPlacementTest.SameSeedGivesSamePositionForRepeatableTests ...........................................................   Passed    0.00 sec
+      Start 27: FoodPlacementTest.OnlyRemainingFreeCellIsChosen
+27/73 Test #27: FoodPlacementTest.OnlyRemainingFreeCellIsChosen .........................................................................   Passed    0.00 sec
+      Start 28: FoodPlacementTest.EveryFreeCellCanBeChosen
+28/73 Test #28: FoodPlacementTest.EveryFreeCellCanBeChosen ..............................................................................   Passed    0.00 sec
+      Start 29: FoodPlacementTest.BoardFullClearsFoodAndReportsIt
+29/73 Test #29: FoodPlacementTest.BoardFullClearsFoodAndReportsIt .......................................................................   Passed    0.00 sec
+      Start 30: FoodPlacementTest.InvalidBoardClearsFoodAndReportsIt
+30/73 Test #30: FoodPlacementTest.InvalidBoardClearsFoodAndReportsIt ....................................................................   Passed    0.00 sec
+      Start 31: FoodPlacementTest.NewPlacementReplacesOldFood
+31/73 Test #31: FoodPlacementTest.NewPlacementReplacesOldFood ...........................................................................   Passed    0.00 sec
+      Start 32: FoodDetectionTest.IsAtMatchesOnlyTheFoodCell
+32/73 Test #32: FoodDetectionTest.IsAtMatchesOnlyTheFoodCell ............................................................................   Passed    0.00 sec
+      Start 33: FoodDetectionTest.ResetRemovesFood
+33/73 Test #33: FoodDetectionTest.ResetRemovesFood ......................................................................................   Passed    0.00 sec
+      Start 34: ScoreManagerTest.StartsAtZero
+34/73 Test #34: ScoreManagerTest.StartsAtZero ...........................................................................................   Passed    0.00 sec
+      Start 35: ScoreManagerTest.EachFoodAddsExactlyTenPoints
+35/73 Test #35: ScoreManagerTest.EachFoodAddsExactlyTenPoints ...........................................................................   Passed    0.00 sec
+      Start 36: ScoreManagerTest.ScoreEqualsFoodCountTimesFoodValue
+36/73 Test #36: ScoreManagerTest.ScoreEqualsFoodCountTimesFoodValue .....................................................................   Passed    0.00 sec
+      Start 37: ScoreManagerTest.BestScoreFollowsHighestScore
+37/73 Test #37: ScoreManagerTest.BestScoreFollowsHighestScore ...........................................................................   Passed    0.00 sec
+      Start 38: ScoreManagerTest.ResetRoundClearsScoreButKeepsBest
+38/73 Test #38: ScoreManagerTest.ResetRoundClearsScoreButKeepsBest ......................................................................   Passed    0.00 sec
+      Start 39: ScoreManagerTest.LowerLaterRoundDoesNotLowerBest
+39/73 Test #39: ScoreManagerTest.LowerLaterRoundDoesNotLowerBest ........................................................................   Passed    0.00 sec
+      Start 40: ScoreManagerTest.HigherLaterRoundRaisesBest
+40/73 Test #40: ScoreManagerTest.HigherLaterRoundRaisesBest .............................................................................   Passed    0.00 sec
+      Start 41: ScoreManagerTest.CustomFoodValueIsUsed
+41/73 Test #41: ScoreManagerTest.CustomFoodValueIsUsed ..................................................................................   Passed    0.00 sec
+      Start 42: ScoreManagerTest.NonPositiveFoodValueFallsBackToDefault
+42/73 Test #42: ScoreManagerTest.NonPositiveFoodValueFallsBackToDefault .................................................................   Passed    0.00 sec
+      Start 43: GameIntegrationTest.Scenario01_NormalSnakeMovement
+43/73 Test #43: GameIntegrationTest.Scenario01_NormalSnakeMovement ......................................................................   Passed    0.04 sec
+      Start 44: GameIntegrationTest.Scenario02_MovementInPermittedDirections
+44/73 Test #44: GameIntegrationTest.Scenario02_MovementInPermittedDirections ............................................................   Passed    0.01 sec
+      Start 45: GameIntegrationTest.Scenario03_PreventInvalidReverseDirection
+45/73 Test #45: GameIntegrationTest.Scenario03_PreventInvalidReverseDirection ...........................................................   Passed    0.01 sec
+      Start 46: GameIntegrationTest.Scenario04_WallCollisionDetection
+46/73 Test #46: GameIntegrationTest.Scenario04_WallCollisionDetection ...................................................................   Passed    0.01 sec
+      Start 47: GameIntegrationTest.Scenario05_SelfCollisionDetection
+47/73 Test #47: GameIntegrationTest.Scenario05_SelfCollisionDetection ...................................................................   Passed    0.01 sec
+      Start 48: GameIntegrationTest.Scenario06_FoodConsumptionAndScoreIncrement
+48/73 Test #48: GameIntegrationTest.Scenario06_FoodConsumptionAndScoreIncrement .........................................................   Passed    0.01 sec
+      Start 49: GameIntegrationTest.Scenario07_GameOverBehavior
+49/73 Test #49: GameIntegrationTest.Scenario07_GameOverBehavior .........................................................................   Passed    0.01 sec
+      Start 50: GameIntegrationTest.Scenario08_PreventionOfMovementAfterGameOver
+50/73 Test #50: GameIntegrationTest.Scenario08_PreventionOfMovementAfterGameOver ........................................................   Passed    0.01 sec
+      Start 51: GameIntegrationTest.Scenario09_RestartAfterGameOver
+51/73 Test #51: GameIntegrationTest.Scenario09_RestartAfterGameOver .....................................................................   Passed    0.01 sec
+      Start 52: GameIntegrationTest.Scenario10_ResetOfAllGameplayState
+52/73 Test #52: GameIntegrationTest.Scenario10_ResetOfAllGameplayState ..................................................................   Passed    0.01 sec
+      Start 53: GameIntegrationTest.Scenario11_ContinuedGameplayAfterRestart
+53/73 Test #53: GameIntegrationTest.Scenario11_ContinuedGameplayAfterRestart ............................................................   Passed    0.01 sec
+      Start 54: GameIntegrationTest.Scenario12_TailDepartureRuleIntegration
+54/73 Test #54: GameIntegrationTest.Scenario12_TailDepartureRuleIntegration .............................................................   Passed    0.01 sec
+      Start 55: GameIntegrationTest.FatalCollisionKeepsEarnedScoreAndRestartClearsIt
+55/73 Test #55: GameIntegrationTest.FatalCollisionKeepsEarnedScoreAndRestartClearsIt ....................................................   Passed    0.01 sec
+      Start 56: FoodManagerTest.PlacementAvoidsAllSnakeSegments
+56/73 Test #56: FoodManagerTest.PlacementAvoidsAllSnakeSegments .........................................................................   Passed    0.01 sec
+      Start 57: FoodManagerTest.DetectsBoardFullGracefully
+57/73 Test #57: FoodManagerTest.DetectsBoardFullGracefully ..............................................................................   Passed    0.01 sec
+      Start 58: FoodManagerTest.RejectsInvalidBounds
+58/73 Test #58: FoodManagerTest.RejectsInvalidBounds ....................................................................................   Passed    0.01 sec
+      Start 59: AllFourWalls/WallIntegrationTest.StopsBeforeEachWallAndIgnoresFurtherMovement/8-byte object <01-00 00-00 00-00 00-00>
+59/73 Test #59: AllFourWalls/WallIntegrationTest.StopsBeforeEachWallAndIgnoresFurtherMovement/8-byte object <01-00 00-00 00-00 00-00> ...   Passed    0.01 sec
+      Start 60: AllFourWalls/WallIntegrationTest.StopsBeforeEachWallAndIgnoresFurtherMovement/8-byte object <FF-FF FF-FF 00-00 00-00>
+60/73 Test #60: AllFourWalls/WallIntegrationTest.StopsBeforeEachWallAndIgnoresFurtherMovement/8-byte object <FF-FF FF-FF 00-00 00-00> ...   Passed    0.01 sec
+      Start 61: AllFourWalls/WallIntegrationTest.StopsBeforeEachWallAndIgnoresFurtherMovement/8-byte object <00-00 00-00 FF-FF FF-FF>
+61/73 Test #61: AllFourWalls/WallIntegrationTest.StopsBeforeEachWallAndIgnoresFurtherMovement/8-byte object <00-00 00-00 FF-FF FF-FF> ...   Passed    0.01 sec
+      Start 62: AllFourWalls/WallIntegrationTest.StopsBeforeEachWallAndIgnoresFurtherMovement/8-byte object <00-00 00-00 01-00 00-00>
+62/73 Test #62: AllFourWalls/WallIntegrationTest.StopsBeforeEachWallAndIgnoresFurtherMovement/8-byte object <00-00 00-00 01-00 00-00> ...   Passed    0.01 sec
+      Start 63: FoodScoreIntegrationTest.InitialFoodIsInsideBoardAndOffSnake
+63/73 Test #63: FoodScoreIntegrationTest.InitialFoodIsInsideBoardAndOffSnake ............................................................   Passed    0.04 sec
+      Start 64: FoodScoreIntegrationTest.EatingFoodGrowsSnakeByOneAndKeepsTail
+64/73 Test #64: FoodScoreIntegrationTest.EatingFoodGrowsSnakeByOneAndKeepsTail ..........................................................   Passed    0.01 sec
+      Start 65: FoodScoreIntegrationTest.FoodNextToPathIsNotEaten
+65/73 Test #65: FoodScoreIntegrationTest.FoodNextToPathIsNotEaten .......................................................................   Passed    0.01 sec
+      Start 66: FoodScoreIntegrationTest.OneConsumptionEventPerFood
+66/73 Test #66: FoodScoreIntegrationTest.OneConsumptionEventPerFood .....................................................................   Passed    0.01 sec
+      Start 67: FoodScoreIntegrationTest.FiveConsecutiveFoodsGiveFiftyPoints
+67/73 Test #67: FoodScoreIntegrationTest.FiveConsecutiveFoodsGiveFiftyPoints ............................................................   Passed    0.01 sec
+      Start 68: FoodScoreIntegrationTest.ReplacementFoodNeverLandsOnLongSnake
+68/73 Test #68: FoodScoreIntegrationTest.ReplacementFoodNeverLandsOnLongSnake ...........................................................   Passed    0.01 sec
+      Start 69: FoodScoreIntegrationTest.FinalScoreIsKeptAtGameOver
+69/73 Test #69: FoodScoreIntegrationTest.FinalScoreIsKeptAtGameOver .....................................................................   Passed    0.01 sec
+      Start 70: FoodScoreIntegrationTest.RestartResetsScoreButKeepsBestScore
+70/73 Test #70: FoodScoreIntegrationTest.RestartResetsScoreButKeepsBestScore ............................................................   Passed    0.01 sec
+      Start 71: FoodScoreIntegrationTest.RestartPlacesNewFoodOffResetSnake
+71/73 Test #71: FoodScoreIntegrationTest.RestartPlacesNewFoodOffResetSnake ..............................................................   Passed    0.01 sec
+      Start 72: FoodScoreIntegrationTest.NoScoreChangeAfterGameOver
+72/73 Test #72: FoodScoreIntegrationTest.NoScoreChangeAfterGameOver .....................................................................   Passed    0.01 sec
+      Start 73: SnakeMovementTests
+73/73 Test #73: SnakeMovementTests ......................................................................................................   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 73
+
+Total Test time (real) =   0.53 sec
