@@ -36,6 +36,18 @@ if(BUILD_GAME)
     add_executable(SnakeGame src/main.cpp)
     target_link_libraries(SnakeGame PRIVATE snake_controller)
 
+    if(APPLE)
+        set_target_properties(SnakeGame PROPERTIES
+            MACOSX_BUNDLE TRUE
+            MACOSX_BUNDLE_GUI_IDENTIFIER "edu.pes.snakegame"
+            MACOSX_BUNDLE_BUNDLE_NAME "Snake Game"
+        )
+        set_source_files_properties(assets/arial.ttf PROPERTIES
+            MACOSX_PACKAGE_LOCATION "Resources/assets"
+        )
+        target_sources(SnakeGame PRIVATE assets/arial.ttf)
+    endif()
+
     # Copy assets to build directory if present
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets")
         file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/assets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
