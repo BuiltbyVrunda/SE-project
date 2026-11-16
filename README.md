@@ -135,17 +135,17 @@ build\SnakeGame.exe
 
 ## Automated Test Suites
 
-The repository contains automated tests across five targets, covering all functional requirements:
+The repository contains **73 automated CTest tests** across five targets, covering all functional requirements:
 
 | Test Target | Framework | Description | Coverage |
 | :--- | :--- | :--- | :--- |
 | `collision_tests` | Google Test | Pure collision detector verification | 23 tests covering wall collisions, valid cells, tail rules, TC-05 fixtures, invalid bounds |
-| `SnakeTests` | Standalone | Charan's snake movement tests | 6 tests covering initial direction, turns, reversal rejection, forward step |
-| `game_integration_tests` | Google Test | Integrated game controller and food logic | 10 tests covering all 12 required scenarios, food manager logic, and restart lifecycle |
+| `SnakeTests` | Standalone | Charan's snake movement tests | 1 CTest entry (`SnakeMovementTests`) running 6 checks: initial direction, turns, reversal rejection, forward step |
+| `game_integration_tests` | Google Test | Integrated game controller and food logic | 20 tests covering all 12 required scenarios, wall integration for all four walls, food manager logic, and restart lifecycle |
 | `food_score_tests` | Google Test | Food placement and scoring unit tests (TC-03, TC-04) | 19 tests covering placement over 500 seeds, last-free-cell, board full, detection, score and best-score rules |
 | `food_score_integration_tests` | Google Test | Food, growth and scoring through the game controller | 10 tests covering growth by one, single consumption per food, 5-food score, replacement food, best score across restart |
 
-To run all 68 tests:
+To run all 73 tests:
 ```sh
 ctest --test-dir build --output-on-failure --verbose
 ```
@@ -166,12 +166,33 @@ ctest --test-dir build --output-on-failure --verbose
 
 ---
 
-## Continuous Integration (GitHub Actions)
+## CI/CD (GitHub Actions)
 
-A GitHub Actions workflow is configured under `.github/workflows/ci.yml`.
-- **Triggers:** Pushes and pull requests on all team branches (`main`, `charan`, `tushar`, `ved`, `vrunda`).
-- **Platform:** Ubuntu with headless virtual display (`xvfb`).
-- **Steps:** Checks out repository, installs `libsfml-dev` and build tools, configures CMake, builds all targets, and runs the complete test suite with CTest.
+[![CI](https://github.com/BuiltbyVrunda/SE-project/actions/workflows/ci.yml/badge.svg)](https://github.com/BuiltbyVrunda/SE-project/actions/workflows/ci.yml)
+
+Full details: [`docs/CI_CD.md`](docs/CI_CD.md).
+
+**Continuous Integration** (`.github/workflows/ci.yml`) runs on every push / PR to `main`, `charan`, `tushar`, `ved`, `vrunda`:
+
+| Job | Purpose |
+| :--- | :--- |
+| Build & Test (Ubuntu 22.04) | `-Wall -Wextra -Wpedantic -Werror` build, all 73 tests under `xvfb`, JUnit report, nightly package on `main` |
+| ASan + UBSan | Memory-error, leak and undefined-behaviour detection over the full suite |
+| Static Analysis | cppcheck (blocking) + clang-format coding-standard report |
+| Security Scan | Fails on OS-command execution or file writes (SR-02 / SR-03) |
+| Build & Test (macOS) | Portability check with Homebrew `sfml@2` |
+
+**Continuous Delivery** (`.github/workflows/release.yml`): pushing a tag such as `v1.0.0` builds and tests on Linux and macOS, packages both with CPack, generates an SPDX SBOM and SHA-256 checksums, and publishes a GitHub Release.
+
+```sh
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+Build options: `-DSNAKE_ENABLE_WARNINGS=ON`, `-DSNAKE_WARNINGS_AS_ERRORS=ON`, `-DSNAKE_ENABLE_SANITIZERS=ON`.
+
+## Documentation
+
+All deliverables (SRS, Test Plan, SAD, RTM, architecture/UML diagrams, sprint report, CI/CD, SBOM) are indexed in [`docs/README.md`](docs/README.md). Contribution workflow: [`CONTRIBUTING.md`](CONTRIBUTING.md). Release history: [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 

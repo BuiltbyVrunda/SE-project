@@ -1,9 +1,39 @@
 cmake_minimum_required(VERSION 3.20)
-project(SnakeGame LANGUAGES CXX)
+set(SNAKE_VERSION "1.0.0" CACHE STRING "Release version (overridden by the release workflow from the git tag)")
+project(SnakeGame VERSION ${SNAKE_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# ---------------------------------------------------------------------------
+# Quality / DevSecOps options (used by CI; all OFF by default for local builds)
+# ---------------------------------------------------------------------------
+option(SNAKE_ENABLE_WARNINGS   "Compile project code with -Wall -Wextra -Wpedantic" OFF)
+option(SNAKE_WARNINGS_AS_ERRORS "Treat compiler warnings as errors (needs SNAKE_ENABLE_WARNINGS)" OFF)
+option(SNAKE_ENABLE_SANITIZERS "Build with AddressSanitizer + UndefinedBehaviorSanitizer (TC-07, TC-13)" OFF)
+
+# Applied per project target below so third-party code (GoogleTest) is untouched.
+function(snake_apply_quality_flags target)
+    if(SNAKE_ENABLE_WARNINGS)
+        if(MSVC)
+            target_compile_options(${target} PRIVATE /W4)
+            if(SNAKE_WARNINGS_AS_ERRORS)
+                target_compile_options(${target} PRIVATE /WX)
+            endif()
+        else()
+            target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+            if(SNAKE_WARNINGS_AS_ERRORS)
+                target_compile_options(${target} PRIVATE -Werror)
+            endif()
+        endif()
+    endif()
+endfunction()
+
+if(SNAKE_ENABLE_SANITIZERS AND NOT MSVC)
+    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all)
+    add_link_options(-fsanitize=address,undefined)
+endif()
 
 # Link GCC runtime statically on MinGW to prevent missing runtime DLLs
 if(MINGW)
@@ -48,6 +78,20 @@ if(BUILD_GAME)
         target_sources(SnakeGame PRIVATE assets/arial.ttf)
     endif()
 
+    foreach(t snake snake_controller SnakeGame)
+        snake_apply_quality_flags(${t})
+    endforeach()
+
+    # Packaging (Continuous Delivery): `cmake --install` / `cpack` lay out
+    # SnakeGame next to assets/ so the font lookup in main.cpp works unchanged.
+    if(APPLE)
+        install(TARGETS SnakeGame BUNDLE DESTINATION .)
+    else()
+        install(TARGETS SnakeGame RUNTIME DESTINATION .)
+        install(DIRECTORY assets DESTINATION .)
+    endif()
+    install(FILES README.md DESTINATION .)
+
     # Copy assets to build directory if present
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets")
         file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/assets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
@@ -76,6 +120,17 @@ if(BUILD_GAME)
         endif()
     endif()
 endif()
+
+foreach(t snake_collision snake_food snake_score)
+    snake_apply_quality_flags(${t})
+endforeach()
+
+set(CPACK_PACKAGE_NAME "SnakeGame")
+set(CPACK_PACKAGE_VENDOR "SE_JACKFRUIT team, PES University")
+set(CPACK_PACKAGE_VERSION "${SNAKE_VERSION}")
+set(CPACK_GENERATOR "TGZ;ZIP")
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+include(CPack)
 
 include(CTest)
 if(BUILD_TESTING)

@@ -1,0 +1,10 @@
+# Project coding standard (see docs/CODING_STANDARDS.md). Checked by CI (advisory).
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+BreakBeforeBraces: Allman
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+PointerAlignment: Left
+NamespaceIndentation: None
+SortIncludes: true

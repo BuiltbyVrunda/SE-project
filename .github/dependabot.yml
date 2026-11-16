@@ -1,0 +1,7 @@
+# DevSecOps: keep the CI/CD action versions patched automatically.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
