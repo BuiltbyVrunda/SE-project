@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_style.css"><title>CI/CD Pipeline</title></head><body>
+<svg width="1100" height="470" viewBox="0 0 1100 470" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="#2f5d8a"/></marker></defs>
+<text x="30" y="38" class="h">Snake Game — CI/CD Pipeline (GitHub Actions)</text>
+<rect x="30" y="80" width="170" height="70" rx="6" class="ext"/><text x="115" y="108" text-anchor="middle" class="t b">Developer</text><text x="115" y="128" text-anchor="middle" class="s">feature branch → PR</text>
+<path d="M200 115H250" class="ln" marker-end="url(#a)"/>
+<rect x="250" y="70" width="160" height="90" rx="6" class="box"/><text x="330" y="100" text-anchor="middle" class="t b">Trigger</text><text x="330" y="120" text-anchor="middle" class="s">push / pull_request</text><text x="330" y="136" text-anchor="middle" class="s">main + team branches</text>
+<path d="M410 115H450" class="ln" marker-end="url(#a)"/>
+<text x="460" y="66" class="s b">ci.yml — 5 parallel quality gates</text>
+<g class="t">
+<rect x="460" y="74" width="300" height="34" rx="5" class="test"/><text x="472" y="96">① Build &amp; Test (Linux, -Werror, JUnit)</text>
+<rect x="460" y="114" width="300" height="34" rx="5" class="test"/><text x="472" y="136">② ASan + UBSan full suite</text>
+<rect x="460" y="154" width="300" height="34" rx="5" class="test"/><text x="472" y="176">③ cppcheck + clang-format report</text>
+<rect x="460" y="194" width="300" height="34" rx="5" class="test"/><text x="472" y="216">④ Security scan (SR-02 / SR-03)</text>
+<rect x="460" y="234" width="300" height="34" rx="5" class="test"/><text x="472" y="256">⑤ macOS build &amp; test (NFR-05)</text>
+</g>
+<path d="M760 150H810" class="ln" marker-end="url(#a)"/>
+<rect x="810" y="100" width="260" height="100" rx="6" class="box"/><text x="940" y="128" text-anchor="middle" class="t b">Review + merge to main</text><text x="940" y="148" text-anchor="middle" class="s">all checks green + peer review</text><text x="940" y="166" text-anchor="middle" class="s">main push → nightly Linux .tar.gz</text><text x="940" y="182" text-anchor="middle" class="s">artifact (14-day retention)</text>
+<path d="M940 200V300" class="ln" marker-end="url(#a)"/><text x="948" y="256" class="lbl">git tag v1.0.0</text>
+<text x="30" y="296" class="s b">release.yml — Continuous Delivery</text>
+<rect x="30" y="306" width="220" height="80" rx="6" class="box"/><text x="140" y="334" text-anchor="middle" class="t b">Resolve version</text><text x="140" y="354" text-anchor="middle" class="s">validate MAJOR.MINOR.PATCH</text>
+<rect x="290" y="306" width="230" height="80" rx="6" class="test"/><text x="405" y="334" text-anchor="middle" class="t b">Build + test gate</text><text x="405" y="354" text-anchor="middle" class="s">Linux x86_64 + macOS arm64</text>
+<rect x="560" y="306" width="230" height="80" rx="6" class="box"/><text x="675" y="334" text-anchor="middle" class="t b">Package (CPack)</text><text x="675" y="354" text-anchor="middle" class="s">tar.gz per platform</text>
+<rect x="830" y="306" width="240" height="80" rx="6" class="ext"/><text x="950" y="330" text-anchor="middle" class="t b">GitHub Release</text><text x="950" y="350" text-anchor="middle" class="s">packages + SBOM (SPDX)</text><text x="950" y="366" text-anchor="middle" class="s">+ SHA256SUMS + CHANGELOG</text>
+<path d="M250 346H290" class="ln" marker-end="url(#a)"/><path d="M520 346H560" class="ln" marker-end="url(#a)"/><path d="M790 346H830" class="ln" marker-end="url(#a)"/>
+<text x="30" y="430" class="s">DevSecOps extras: Dependabot keeps action versions patched · least-privilege workflow permissions · concurrency cancels stale runs · CODEOWNERS requests module-owner review</text>
+</svg></body></html>

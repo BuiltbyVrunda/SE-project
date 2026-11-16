@@ -1,0 +1,138 @@
+# Continuous Delivery: pushing a version tag (e.g. `git tag v1.0.0 && git push origin v1.0.0`)
+# builds, tests and packages the game for Linux and macOS, generates a Software Bill of
+# Materials (SBOM) and checksums, and publishes everything as a GitHub Release.
+name: Release
+
+on:
+  push:
+    tags: [ 'v*.*.*' ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (without the leading v), e.g. 1.0.0'
+        required: true
+        default: '1.0.0'
+
+permissions:
+  contents: read
+
+env:
+  # Passed to shell steps only through this env var (never interpolated into scripts).
+  VERSION: ${{ github.event.inputs.version || github.ref_name }}
+
+jobs:
+  package:
+    name: Package (${{ matrix.name }})
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - name: linux-x86_64
+            os: ubuntu-22.04
+          - name: macos-arm64
+            os: macos-14
+    runs-on: ${{ matrix.os }}
+    env:
+      PLATFORM: ${{ matrix.name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        shell: bash
+        run: |
+          v="${VERSION#v}"
+          if [[ ! "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version '$v' (expected MAJOR.MINOR.PATCH)"; exit 1
+          fi
+          echo "SNAKE_VERSION=$v" >> "$GITHUB_ENV"
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsfml-dev xvfb
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install sfml@2
+
+      - name: Configure
+        shell: bash
+        run: |
+          EXTRA=""
+          if [[ "$RUNNER_OS" == "macOS" ]]; then EXTRA="-DCMAKE_PREFIX_PATH=$(brew --prefix sfml@2)"; fi
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+            -DSNAKE_VERSION="$SNAKE_VERSION" $EXTRA
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      # Release gate: nothing is published unless the whole suite passes.
+      - name: Test (release gate)
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            xvfb-run ctest --test-dir build --output-on-failure -C Release
+          else
+            ctest --test-dir build --output-on-failure -C Release
+          fi
+
+      - name: Package
+        shell: bash
+        run: |
+          cd build
+          cpack -G TGZ
+          for f in SnakeGame-*.tar.gz; do
+            mv "$f" "SnakeGame-${SNAKE_VERSION}-${PLATFORM}.tar.gz"
+          done
+          ls -l *.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.name }}
+          path: build/SnakeGame-*-${{ matrix.name }}.tar.gz
+
+  publish:
+    name: Publish GitHub Release
+    needs: package
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: dist/SnakeGame-sbom.spdx.json
+          upload-artifact: false
+
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Resolve tag
+        shell: bash
+        run: |
+          v="${VERSION#v}"
+          echo "RELEASE_TAG=v$v" >> "$GITHUB_ENV"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: Snake Game ${{ env.RELEASE_TAG }}
+          body_path: CHANGELOG.md
+          draft: ${{ github.event_name == 'workflow_dispatch' }}
+          files: dist/*
