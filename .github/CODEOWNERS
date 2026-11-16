@@ -1,0 +1,15 @@
+# Each module owner is automatically requested for review on changes to their area.
+# Note: GitHub only requests review from users with write access to the repo.
+src/snake.*                 @yelecharan
+tests/snake_test.cpp        @yelecharan
+src/food_manager.*          @BuiltbyVrunda
+src/score_manager.*         @BuiltbyVrunda
+tests/food_score*           @BuiltbyVrunda
+src/collision_detector.*    @vedmudkavi
+tests/collision_detector*   @vedmudkavi
+src/game_controller.*       @tusharrrr09
+src/main.cpp                @tusharrrr09
+tests/game_integration*     @tusharrrr09
+.github/                    @tusharrrr09 @BuiltbyVrunda
+CMakeLists.txt              @tusharrrr09
+docs/                       @BuiltbyVrunda @yelecharan @vedmudkavi @tusharrrr09

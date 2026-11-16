@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_style.css"><title>Use Case Diagram</title></head><body>
+<svg width="1000" height="620" viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0L10,5L0,10" fill="none" stroke="#2f5d8a" stroke-width="1.4"/></marker></defs>
+<text x="30" y="38" class="h">Snake Game — UML Use Case Diagram</text>
+<g transform="translate(80,250)" stroke="#1b1f24" stroke-width="2" fill="none"><circle cx="0" cy="0" r="16"/><path d="M0 16V70M-28 36H28M0 70L-22 110M0 70L22 110"/></g><text x="80" y="390" text-anchor="middle" class="t b">Player</text>
+<g transform="translate(920,300)" stroke="#1b1f24" stroke-width="2" fill="none"><circle cx="0" cy="0" r="16"/><path d="M0 16V70M-28 36H28M0 70L-22 110M0 70L22 110"/></g><text x="920" y="440" text-anchor="middle" class="t b">Developer /</text><text x="920" y="458" text-anchor="middle" class="t b">Tester</text>
+<rect x="190" y="70" width="640" height="530" rx="6" fill="none" stroke="#1b1f24"/><text x="206" y="92" class="s b">Snake Game (system boundary)</text>
+<g class="t" text-anchor="middle">
+<ellipse cx="380" cy="135" rx="140" ry="28" class="box"/><text x="380" y="140">UC-01 Start round (FR-01–03)</text>
+<ellipse cx="380" cy="215" rx="140" ry="28" class="box"/><text x="380" y="220">UC-02 Steer snake (FR-04–06)</text>
+<ellipse cx="380" cy="295" rx="140" ry="28" class="box"/><text x="380" y="300">UC-03 Eat food (FR-07–11)</text>
+<ellipse cx="380" cy="375" rx="140" ry="28" class="box"/><text x="380" y="380">UC-04 View score / best</text>
+<ellipse cx="380" cy="455" rx="140" ry="28" class="box"/><text x="380" y="460">UC-05 Restart (FR-16–17)</text>
+<ellipse cx="380" cy="540" rx="140" ry="28" class="box"/><text x="380" y="545">UC-06 Exit game (FR-18)</text>
+<ellipse cx="680" cy="215" rx="130" ry="28" class="box"/><text x="680" y="212">Validate direction</text><text x="680" y="228" class="s">(reject 180°, SR-04)</text>
+<ellipse cx="680" cy="330" rx="130" ry="28" class="box"/><text x="680" y="327">Detect collision</text><text x="680" y="343" class="s">(FR-12–13)</text>
+<ellipse cx="680" cy="440" rx="130" ry="28" class="box"/><text x="680" y="437">Show Game Over</text><text x="680" y="453" class="s">(FR-14–15)</text>
+<ellipse cx="680" cy="540" rx="130" ry="28" class="box"/><text x="680" y="545">Build &amp; run tests (CI)</text>
+</g>
+<g class="ln"><path d="M108 280L240 140"/><path d="M108 285L240 215"/><path d="M108 290L240 295"/><path d="M108 295L240 375"/><path d="M108 300L240 455"/><path d="M108 305L240 535"/><path d="M892 360L810 540"/></g>
+<g class="ln dash"><path d="M520 215H548" marker-end="url(#o)"/><path d="M500 236L560 310" marker-end="url(#o)"/><path d="M680 358V410" marker-end="url(#o)"/></g>
+<text x="526" y="206" class="lbl">«include»</text><text x="540" y="262" class="lbl">«include»</text><text x="688" y="390" class="lbl">«extend» [fatal]</text>
+</svg></body></html>
