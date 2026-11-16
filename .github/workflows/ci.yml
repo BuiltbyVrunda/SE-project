@@ -1,3 +1,12 @@
+# Continuous Integration for the Snake Game.
+#
+# Every push / pull request runs five independent quality gates:
+#   1. build-and-test   - Linux build with strict warnings + full CTest suite (JUnit report)
+#   2. sanitizers       - ASan + UBSan run of the whole suite (TC-07 / TC-13 sanitizer steps)
+#   3. static-analysis  - cppcheck (blocking) + clang-format coding-standard report (advisory)
+#   4. security-scan    - SR-02 / SR-03 forbidden-API scan (TC-14 evidence)
+#   5. macos-build      - portability check (NFR-05) on macOS with Homebrew SFML 2
+# On main, the Linux job also publishes a ready-to-run build artifact (continuous delivery).
 name: CI
 
 on:
@@ -5,6 +14,14 @@ on:
     branches: [ main, charan, tushar, ved, vrunda ]
   pull_request:
     branches: [ main, charan, tushar, ved, vrunda ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
@@ -25,13 +42,128 @@ jobs:
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_GAME=ON \
-            -DBUILD_TESTING=ON
+            -DBUILD_TESTING=ON \
+            -DSNAKE_ENABLE_WARNINGS=ON \
+            -DSNAKE_WARNINGS_AS_ERRORS=ON
 
       - name: Build all targets
-        run: |
-          cmake --build build --config Release --parallel
+        run: cmake --build build --config Release --parallel
 
       - name: Run automated test suite
         run: |
-          xvfb-run ctest --test-dir build --output-on-failure -C Release --verbose
+          xvfb-run ctest --test-dir build --output-on-failure -C Release \
+            --output-junit test-results.xml
 
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-linux
+          path: build/test-results.xml
+
+      - name: Package nightly build (main only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          cd build
+          cpack -G TGZ
+          ls -l *.tar.gz
+
+      - name: Upload nightly build (main only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SnakeGame-linux-nightly
+          path: build/SnakeGame-*.tar.gz
+          retention-days: 14
+
+  sanitizers:
+    name: ASan + UBSan
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsfml-dev xvfb
+
+      - name: Configure with sanitizers
+        run: |
+          cmake -S . -B build-asan \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_GAME=ON \
+            -DBUILD_TESTING=ON \
+            -DSNAKE_ENABLE_SANITIZERS=ON
+
+      - name: Build
+        run: cmake --build build-asan --parallel
+
+      - name: Run tests under sanitizers
+        env:
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: xvfb-run ctest --test-dir build-asan --output-on-failure
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck clang-format
+
+      - name: cppcheck (blocking on warnings)
+        run: |
+          cppcheck --version
+          cppcheck --enable=warning,performance,portability --std=c++17 \
+            --error-exitcode=1 --inline-suppr \
+            --suppress=missingIncludeSystem -I src src
+
+      - name: cppcheck style report (advisory)
+        run: |
+          cppcheck --enable=style --std=c++17 --inline-suppr \
+            --suppress=missingIncludeSystem -I src src 2> cppcheck-style.txt || true
+          cat cppcheck-style.txt
+
+      - name: clang-format coding-standard report (advisory)
+        continue-on-error: true
+        run: |
+          clang-format --version
+          clang-format --dry-run --Werror src/*.cpp src/*.h tests/*.cpp
+
+  security-scan:
+    name: Security Scan (SR-02 / SR-03)
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Forbidden-API scan
+        run: ./scripts/security_scan.sh src
+
+  macos-build:
+    name: Build & Test (macOS)
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SFML 2
+        run: brew install sfml@2
+
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix sfml@2)"
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
