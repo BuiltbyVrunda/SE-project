@@ -26,19 +26,19 @@ personal branches + pull requests, and GitHub Actions CI.
 | # | Item | Type | Owner | Requirements | Sprint | Status |
 |---|---|---|---|---|---|---|
 | 6 | Review the RTM against the SRS and Test Plan | Review | Tushar | all | Phase 1 | Done (23 Oct) |
-| 7 | Resolve missing details in the Test Plan | Doc | Vrunda | — | Phase 1 | Done via execution addendum (environment, controls, versions recorded) — close issue |
+| 7 | Resolve missing details in the Test Plan | Doc | Vrunda | — | Phase 1 | Closed. The execution addendum records the test environment. See the system validation report for the remaining TC-14 evidence. |
 | 8 | Review the SAD | Review | Ved | NFR-04 | Phase 1 | Done (31 Oct) |
 | 9 | Review test cases TC-01 – TC-14 | Review | Vrunda, Charan | all | Phase 1 | Done (31 Oct) |
 | 10 | Execute test cases and record results | Test | Charan | all | Sprint 2 | Done (31 Oct) |
-| 11 | Final project integration review | Review | All | all | Sprint 2 | Open → close after final check |
-| 12 | Prepare final submission | Release | All | all | Release | Open → close on submission |
+| 11 | Final project integration review | Review | All | all | Sprint 2 | Closed in GitHub on 16 Nov |
+| 12 | Prepare final submission | Release | All | all | Release | Closed in GitHub on 16 Nov. Instructor submission receipt is tracked separately. |
 | 16 | Keyboard control and snake movement | Story | Charan | FR-04–06, SR-01, SR-04 | Sprint 1 | Done |
 | 17 | Food placement, growth and scoring | Story | Vrunda | FR-07–11 | Sprint 1→2 | Done |
 | 18 | Wall and self-collision detection | Story | Ved | FR-12–14 | Sprint 1 | Done |
 | 19 | Integrate playable game, display, lifecycle | Story | Tushar | FR-01–03, FR-14–18, SR-05 | Sprint 1 | Done |
 | 20 | Build instructions and GitHub Actions | Story | Tushar | NFR-02, NFR-05, NFR-06 | Sprint 1 | Done |
-| 21 | Record & upload Sprint 1 demo video (~1 min) | Deliverable | Tushar | — | Sprint 1 | **Open — still to do** |
-| 22 | Record Sprint 2 demo (~2 min), freeze development | Deliverable | Tushar | — | Sprint 2 | **Open — still to do** |
+| 21 | Record & upload Sprint 1 demo video (~1 min) | Deliverable | Tushar | — | Sprint 1 | Closed. [1:00 recording](demos/Sprint-1-Demo.mp4) merged in [#38](https://github.com/BuiltbyVrunda/SE-project/pull/38). |
+| 22 | Record Sprint 2 demo (~2 min), freeze development | Deliverable | Tushar | — | Sprint 2 | Closed. [2:00 recording](demos/Sprint-2-Demo.mp4) merged in [#38](https://github.com/BuiltbyVrunda/SE-project/pull/38). [v1.0.0](https://github.com/BuiltbyVrunda/SE-project/releases/tag/v1.0.0) is the release baseline. |
 
 ### Epics
 1. **Requirements & design** (#6–#9) 2. **Gameplay core** (#16–#18) 3. **Integration & lifecycle** (#19)
@@ -53,13 +53,13 @@ personal branches + pull requests, and GitHub Actions CI.
 | 29 Oct | 10 |
 | 31 Oct | 7 |
 | 1 Nov | 5 (#7, #11, #12, #21, #22) |
-| 17 Nov target | 0 |
+| 16 Nov | 0 (GitHub issues closed) |
 
 ## Pull requests & reviews
-17 PRs were merged. Sprint planning asked for *reviewed* PRs, but most PRs were merged by their own author
+Sprint planning asked for *reviewed* PRs, but most PRs were merged by their own author
 without a recorded GitHub review; PR #23 (Ved) was merged by Tushar and PRs #5 and #29 (Ved) by Vrunda.
 Issue #9 carries a written review comment from Charan. Vrunda's food/score module (4 commits, 31 Oct)
-was pushed directly to `main`.
+was pushed directly to `main`. Vrunda approved both the demo and coverage PRs ([#38](https://github.com/BuiltbyVrunda/SE-project/pull/38) and [#39](https://github.com/BuiltbyVrunda/SE-project/pull/39)).
 **Process improvement adopted for v1.0.0:** CODEOWNERS + PR template make a non-author review part of the
 Definition of Done; enabling branch protection on `main` ("require 1 approval + passing CI") is recommended.
 

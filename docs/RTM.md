@@ -1,7 +1,7 @@
 # Requirements Traceability Matrix (RTM) — Snake Game
 
 Forward traceability: **SRS requirement → STP test case → automated test / CI job → status**. 
-Source of record: `docs/RTM_SnakeGame.xlsx` (Tushar N). This Markdown/CSV version adds the automated-evidence and owner columns and reflects the CI quality gates added in v1.0.0.
+Original team workbook: `docs/RTM_SnakeGame.xlsx` (Tushar N). This Markdown/CSV version adds the automated-evidence and owner columns and reflects the CI quality gates added in v1.0.0. See the [system validation report](system_validation_report.md) for the current TC-14 evidence status.
 
 | ID | Requirement | Category | Test case | Automated evidence | Owner | Status |
 |---|---|---|---|---|---|---|
@@ -30,8 +30,8 @@ Source of record: `docs/RTM_SnakeGame.xlsx` (Tushar N). This Markdown/CSV versio
 | NFR-05 | Build and launch with the compiler and SFML version documented by the team. | Compatibility | TC-12 | CI build-and-test (Ubuntu) + macos-build jobs | Tushar N | Pass |
 | NFR-06 | README lists required tools, SFML dependency and build/run steps. | Documentation | TC-12 | CI builds from README commands on a clean runner | Tushar N | Pass |
 | SR-01 | Ignore unsupported keyboard keys without crashing. | Security | TC-13 | tests/game_integration_test.cpp: input ignored when not Playing; manual TC-13 | Yele Charan | Pass |
-| SR-02 | Do not execute operating-system commands in response to player input. | Security | TC-14 | CI security-scan job (scripts/security_scan.sh) | Ved Mudkavi | Pass |
-| SR-03 | Do not read or modify unrelated user files during normal gameplay. | Security | TC-14 | CI security-scan job (scripts/security_scan.sh) | Ved Mudkavi | Pass |
+| SR-02 | Do not execute operating-system commands in response to player input. | Security | TC-14 | CI security-scan job (scripts/security_scan.sh) | Ved Mudkavi | Static scan passed. Runtime trace pending. |
+| SR-03 | Do not read or modify unrelated user files during normal gameplay. | Security | TC-14 | CI security-scan job (scripts/security_scan.sh) | Ved Mudkavi | Static scan passed. Runtime trace pending. |
 | SR-04 | Validate direction changes against the current game state. | Security | TC-13 | tests/snake_test.cpp; tests/game_integration_test.cpp: Scenario03 | Yele Charan | Pass |
 | SR-05 | Handle window-close events and shutdown safely. | Security | TC-07 | CI sanitizers job + manual TC-07 | Tushar N | Pass |
 
@@ -41,8 +41,8 @@ Source of record: `docs/RTM_SnakeGame.xlsx` (Tushar N). This Markdown/CSV versio
 |---|---|---|---|---|
 | Functional | FR-01 – FR-18 | 18 | TC-01 – TC-07 | All Pass |
 | Non-functional | NFR-01 – NFR-06 | 6 | TC-08 – TC-12 | All Pass |
-| Security | SR-01 – SR-05 | 5 | TC-07, TC-13, TC-14 | All Pass (TC-14 via automated static scan) |
-| **Total** | | **29** | TC-01 – TC-14 | Pass: 29 |
+| Security | SR-01 – SR-05 | 5 | TC-07, TC-13, TC-14 | 3 Pass, 2 pending runtime evidence |
+| **Total** | | **29** | TC-01 – TC-14 | Pass: 27. Runtime evidence pending: 2 |
 
 ## Verification notes
 
@@ -71,8 +71,8 @@ Source of record: `docs/RTM_SnakeGame.xlsx` (Tushar N). This Markdown/CSV versio
 - **NFR-05** — TC-12: teammate completed a fresh clone/build/launch successfully. Local CTest: 73/73 passed.
 - **NFR-06** — TC-12: teammate fresh-clone walkthrough reportedly succeeded; confirm README instructions remain current.
 - **SR-01** — TC-13 unsupported-key and invalid-state input checks reported Pass.
-- **SR-02** — TC-14: automated forbidden-API scan (system/popen/exec/fork/CreateProcess) runs on every push and is clean. Runtime Process Monitor trace remains a manual, optional step.
-- **SR-03** — TC-14: automated scan confirms no file writes/deletes; the only file opened is the bundled font (read-only). Runtime file-activity trace remains a manual, optional step.
+- **SR-02** — TC-14: automated forbidden-API scan (system/popen/exec/fork/CreateProcess) runs on every push and is clean. The Test Plan also requires a runtime file activity trace. That evidence is pending.
+- **SR-03** — TC-14: the CI source scan passed. File activity during a full gameplay round, restart and close has not been verified with the requested runtime trace.
 - **SR-04** — TC-13 direction validation and reversal checks reported Pass.
 - **SR-05** — TC-07 manual window-close check reported Pass; sanitizer sub-step now automated in CI.
 
