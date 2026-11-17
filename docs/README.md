@@ -16,6 +16,7 @@
 | Software Bill of Materials | [`SBOM.md`](SBOM.md) (+ SPDX file on each release) | Team |
 | Demo script | [`demo_presentation_plan.md`](demo_presentation_plan.md) | Tushar N |
 | Test evidence | [`../reports/`](../reports), [`collision_test_run_2026-11-07.txt`](collision_test_run_2026-11-07.txt) | All |
+| Coverage reports | [Code coverage](code_coverage.md), [branch coverage](branch_coverage.md) | Team |
 | Study / viva guide | [`STUDY_GUIDE.md`](STUDY_GUIDE.md) | — |
 
 Diagram sources (editable SVG/HTML) are in [`diagrams/src/`](diagrams/src).
