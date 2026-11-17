@@ -14,8 +14,9 @@
 | Project management, sprints, risks, tech debt | [`Sprint_Report.md`](Sprint_Report.md) | Team |
 | Coding standards | [`CODING_STANDARDS.md`](CODING_STANDARDS.md) | Team |
 | Software Bill of Materials | [`SBOM.md`](SBOM.md) (+ SPDX file on each release) | Team |
-| Demo script | [`demo_presentation_plan.md`](demo_presentation_plan.md) | Tushar N |
+| Sprint demos | [Sprint 1 (1:00)](demos/Sprint-1-Demo.mp4), [Sprint 2 (2:00)](demos/Sprint-2-Demo.mp4), [demo script](demo_presentation_plan.md) | Team |
 | Test evidence | [`../reports/`](../reports), [`collision_test_run_2026-11-07.txt`](collision_test_run_2026-11-07.txt) | All |
+| Final test reports | [Unit test report](unit_test_report.md), [system validation report](system_validation_report.md) | Team |
 | Coverage reports | [Code coverage](code_coverage.md), [branch coverage](branch_coverage.md) | Team |
 | Study / viva guide | [`STUDY_GUIDE.md`](STUDY_GUIDE.md) | — |
 
